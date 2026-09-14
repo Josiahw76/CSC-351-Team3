@@ -1,0 +1,23 @@
+Running with the following settings: 
+   Operation count = 10000
+   Request percent = 70
+   RNG seed        = 1
+Stats for firstFit
+Ave holes = 3.96959
+Ave traversals = 14.2074
+Denials = 55.3646%
+
+Stats for nextFit
+Ave holes = 3.73636
+Ave traversals = 13.8955
+Denials = 55.5106%
+
+Stats for bestFit
+Ave holes = 3.92623
+Ave traversals = 20.7228
+Denials = 55.554%
+
+Stats for worstFit
+Ave holes = 4.25804
+Ave traversals = 28.5548
+Denials = 55.554%
