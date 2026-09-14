@@ -5,7 +5,7 @@
 //				List Functions				      //
 //******************************************************************************
 
-list::list() {}
+list::list(unsigned int listCapacity) {}
 
 
 list::~list() {}
