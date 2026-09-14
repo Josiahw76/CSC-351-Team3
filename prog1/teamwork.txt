@@ -1,2 +1,6 @@
 This is to track who is doing what
+
+Kam:
+  Writing out list and node classes
+
 	
