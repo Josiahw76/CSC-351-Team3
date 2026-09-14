@@ -2,21 +2,41 @@
 // Template written by Josiah W.
 
 
+// forward declarations so we can define memManager first
+class node;
+class list;
+
+class memManager {
+	private:
+		node *memRoot; // first node of dll
+		node *memNext;
+		unsigned int start, length;
+		unsigned int policy;
+	public:
+		memManager(unsigned int policy, unsigned int blockCount);
+		// number of blocks in final submission is 128
+		~memManager();
+		int allocMem(int process_id, int num_units);
+		void deallocMem(int process_id);
+		unsigned int countHoles();
+		void checkLL(); // check integrity of dll, panic if broken
+		void printIt();
+
+};
+
 class node {
 	private:
 		int pid; // -1 is free node, >= 0 is node with PID of that number
-		unsigned int start; // starting memory block id
-		unsigned int length; // number of blocks represented by this node
-		node *prev; // Left pointer, if first it's null
-		node *next; // Right pointer, if last it's null
+		unsigned int start, length; // tracks memory blocks
+		node *prev, *next; // DLL left/right pointers
 	
 	public:
-		node(int pid, unsigned int start, unsigned int length);
+		node(int pid, unsigned int start, unsigned int length,
+						node *prev = NULL, node *next = NULL);
 
+	friend memManager; // Friends are ones who can access your private members
 };
-class memManager {
 
-};
 class list {
 	private:
 		unsigned int *a; // actual contents of the list
