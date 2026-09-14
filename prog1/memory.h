@@ -1,5 +1,5 @@
 // CSC 351 Team 2 - Fall 2026
-// Template written by Josiah W.
+// Template written by Josiah W. / Dylan P.
 
 
 class node {
@@ -14,7 +14,40 @@ class node {
 		node(int pid, unsigned int start, unsigned int length);
 
 };
+
 class memManager {
+	private:
+        node *memRoot; // Points to the first node in DLL structure
+        node *memNext; // Points to the node where search for next fit begins
+        unsigned int start, length; // ??? ASK SWHEAT ??? 
+        
+        // 1-4 for fit policies first, next, best, and worst respectively
+        unsigned int policy; 
+        
+    public:
+        // Constructor that builds an object of blockCount memory blocks which
+        // uses the given policy
+        memManager(unsigned int policy, unsigned int blockCount); 
+        ~memManager(); // Destructor: deallocates all dynamic memory in use
+        
+        // Allocates num_units units of memory to a process whose id is 
+        // process_id. If successful, it returns the number of nodes traversed 
+        // in the linked list. Otherwise, it returns -1
+        int allocMem(int process_id, int num_units);
+        
+        // If the process indexed by process_id has any memory allocated to it,
+        // deallocates that memory
+        void deallocMem(int process_id);
+        
+        // Checks integrity of DLL for improper linkages and length. If list is
+        // out of order, the program shall exit with error message identifying
+        // the node where the issue was found and the number of nodes that were
+        // on the list. The first node should have prev pointer to NUll while
+        // the last node should have a next pointer to NULL
+        void checkLL();
+        
+        // Prints all the nodes' attributes in the DLL, one node per line
+        void printIt();
 
 };
 class list {
