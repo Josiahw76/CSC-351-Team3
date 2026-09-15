@@ -41,3 +41,19 @@ unsigned int list::getCount() {}
 //				memManager Functions			      //
 //******************************************************************************
 
+memManager::memManager(unsigned int policy, unsigned int blockCount) {}
+
+memManager::~memManager() {}
+
+int memManager::allocMem(int process_id, int num_units) {}
+
+void memManager::deallocMem(int process_id) {
+	// This should just find all blocks with pid == process_id and
+	// assign that value to -1
+}
+
+void memManager::checkLL() {}
+
+void printIt() {}
+
+
