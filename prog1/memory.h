@@ -3,16 +3,32 @@
 #ifndef __MEMORY_H
 #define __MEMORY_H
 
-// forward declarations so we can define memManager first
+// forward declarations
 class node;
 class list;
+class memManager;
+
+// Use these for simple math
+const unsigned int KB = 1024;
+const unsigned int MAX_MEM = 256 * KB;
+
+// Make policies easier to read for switch case.
+// We don't have to use this, but it's here.
+enum which_policy {
+	FIRST 	= 	1,
+	NEXT 	= 	2,
+	BEST 	= 	3,
+	WORST 	= 	4
+};
 
 class memManager {
 	private:
         node *memRoot; // Points to the first node in DLL structure
         node *memNext; // Points to the node where search for next fit begins
-        unsigned int start, length; // ??? ASK SWHEAT ??? 
+        // unsigned int start, length; // ??? ASK SWHEAT ??? 
         
+		unsigned int nodeCount;
+
         // 1-4 for fit policies first, next, best, and worst respectively
         unsigned int policy; 
         
@@ -60,12 +76,15 @@ class node {
 	friend memManager; // Friends are ones who can access your private members
 };
 
+// It's a list(!)
 class list {
 	private:
 		unsigned int *a; // actual contents of the list
 		unsigned int listCount, listCapacity;
 	public:
 		list(unsigned int listCapacity);
+		// Important behavior to note: a capacity of zero means no array.
+		// serves you right. Asking for an empty list smh
 		~list();
 		bool add(int val);
 		bool deleteAt(unsigned int index);

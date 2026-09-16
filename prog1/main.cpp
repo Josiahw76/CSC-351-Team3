@@ -2,7 +2,6 @@
 
 using namespace std;
 
-
 // Helper function to parse the args
 int reconstruct_int(char *str) {
     char a;
