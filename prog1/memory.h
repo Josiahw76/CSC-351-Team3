@@ -1,6 +1,7 @@
-@ -2,21 +2,41 @@
 // Template written by Josiah W.
 
+#ifndef __MEMORY_H
+#define __MEMORY_H
 
 // forward declarations so we can define memManager first
 class node;
@@ -58,9 +59,19 @@ class node {
 
 	friend memManager; // Friends are ones who can access your private members
 };
-class memManager {
 
-};
 class list {
 	private:
 		unsigned int *a; // actual contents of the list
+		unsigned int listCount, listCapacity;
+	public:
+		list(unsigned int listCapacity);
+		~list();
+		bool add(int val);
+		bool deleteAt(unsigned int index);
+		int readAt(unsigned int index);
+		void printIt() const;
+		unsigned int getCount();
+};
+
+#endif

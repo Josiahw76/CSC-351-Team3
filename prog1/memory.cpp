@@ -1,41 +1,81 @@
 #include "memory.h"
-
+#include <iostream>
 
 //******************************************************************************
 //				Node Function				      //
 //******************************************************************************
 
 node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, node *next = NULL) {
-	this.pid = pid;
-	this.start = start;
-	this.length = length;
-	this.prev = prev;
-	this.next = next;
+	this->pid = pid;
+	this->start = start;
+	this->length = length;
+	this->prev = prev;
+	this->next = next;
 }
 
 //******************************************************************************
 //				List Functions				      //
 //******************************************************************************
 
-list::list(unsigned int listCapacity) {}
+// Josiah - I'm just gonna write this out
+//
+// I did some quick testing and this works just fine.
+// Note that it is possible to allocate a list of size zero, just
+// nothing happens when you do so it's pretty pointless. It can't expand
+
+list::list(unsigned int listCapacity) {
+	this->listCapacity = listCapacity;
+	listCount = 0;
+
+	// If capacity is zero, don't bother allocating anything
+	if (listCapacity > 0) {
+		a = new unsigned int[listCapacity];
+	} else {
+		a = NULL;
+	}
+}
+
+list::~list() {
+	if (a != NULL) { delete [] a; } // If a exists, delete it.
+}
+
+bool list::add(int val) {
+	bool rc = listCount < listCapacity;
+	if (rc) {
+		a[listCount] = val;
+		listCount++;
+	}
+	return rc;
+}
+
+bool list::deleteAt(unsigned int index) {
+	bool rc = (index > 0 && index <= listCapacity);
+	if (rc) {
+		// decrement before to account for zero indexind
+		listCount--;
+		a[index] = a[listCount];
+	}
+	return rc;
+}
+
+int list::readAt(unsigned int index) {
+	int rc = -1; // return -1 if read failed for any reason
+	if (index > 0 && index <= listCapacity) {
+		rc = a[index];
+	}
+	return rc;
+}
 
 
-list::~list() {}
+void list::printIt() const {
+	for (unsigned int i = 0; i < listCount; i++) {
+		std::cout << a[i] << std::endl;
+	}
+}
 
-
-bool list::add(int val) {}
-
-
-bool list::deleteAt(unsigned int index) {}
-
-
-int list::readAt(unsigned int index) {}
-
-
-void list::printIt() {}
-
-
-unsigned int list::getCount() {}
+unsigned int list::getCount() {
+	return listCount;
+}
 
 //******************************************************************************
 //				memManager Functions			      //
