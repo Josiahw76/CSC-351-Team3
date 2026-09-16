@@ -11,15 +11,14 @@ class memManager;
 // Use these for simple math
 const unsigned int KB = 1024;
 const unsigned int MAX_MEM = 256 * KB;
+const int BLOCK_COUNT = 128;
 
-// Make policies easier to read for switch case.
-// We don't have to use this, but it's here.
-enum which_policy {
-	FIRST 	= 	1,
-	NEXT 	= 	2,
-	BEST 	= 	3,
-	WORST 	= 	4
-};
+// Policy variables
+const unsigned int FIRST = 1;
+const unsigned int NEXT = 2;
+const unsigned int BEST = 3;
+const unsigned int WORST = 4;
+
 
 class memManager {
 	private:
@@ -69,7 +68,6 @@ class node {
 		node *prev, *next; // DLL left/right pointers
 	
 	public:
-		node(int pid, unsigned int start, unsigned int length);
 		node(int pid, unsigned int start, unsigned int length,
 						node *prev = NULL, node *next = NULL);
 
@@ -77,6 +75,7 @@ class node {
 };
 
 // It's a list(!)
+// what does he even do
 class list {
 	private:
 		unsigned int *a; // actual contents of the list

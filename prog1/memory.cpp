@@ -21,7 +21,7 @@ node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, 
 //
 // I did some quick testing and this works just fine.
 // Note that it is possible to allocate a list of size zero, just
-// nothing happens when you do so it's pretty pointless. It can't expand
+// nothing happens when you do so it's pointless.
 
 list::list(unsigned int listCapacity) {
 	this->listCapacity = listCapacity;
@@ -51,7 +51,7 @@ bool list::add(int val) {
 bool list::deleteAt(unsigned int index) {
 	bool rc = (index > 0 && index <= listCapacity);
 	if (rc) {
-		// decrement before to account for zero indexind
+		// decrement before to account for zero indexing
 		listCount--;
 		a[index] = a[listCount];
 	}
@@ -83,12 +83,21 @@ unsigned int list::getCount() {
 
 memManager::memManager(unsigned int policy, unsigned int blockCount) {}
 
-memManager::~memManager() {}
+memManager::~memManager() {
+	// can't really do a recursive deletion here, so
+	// conditional loop it is.
+	node *p = first;
+	while (p->next != NULL) {
+		p = p->next;
+		delete p->prev;
+	}
+	delete p;
+}
 
 int memManager::allocMem(int process_id, int num_units) {}
 
 void memManager::deallocMem(int process_id) {
-	// This should just find all blocks with pid == process_id and
+	// This should just find all blocks with pid = process_id and
 	// assign that value to -1
 }
 
@@ -97,3 +106,13 @@ void memManager::checkLL() {}
 void printIt() {}
 
 
+// Policy definitions below:
+
+/*
+First fit. Allocate the first hole that is big enough. Searching can start either at the beginning of the set of holes or at the location where the previous first-fit search ended. We can stop searching as soon as we find a free hole that is large enough.
+
+Best fit. Allocate the smallest hole that is big enough. We must search the entire list, unless the list is ordered by size. This strategy produces the smallest leftover hole.
+
+Worst fit. Allocate the largest hole. Again, we must search the entire list, unless it is sorted by size. This strategy produces the largest leftover hole, which may be more useful than the smaller leftover hole from a best-fit approach.
+
+   */
