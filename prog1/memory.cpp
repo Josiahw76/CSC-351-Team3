@@ -35,9 +35,13 @@ list::list(unsigned int listCapacity) {
 	}
 }
 
+//******************************************************************************
+
 list::~list() {
 	if (a != NULL) { delete [] a; } // If a exists, delete it.
 }
+
+//******************************************************************************
 
 bool list::add(int val) {
 	bool rc = listCount < listCapacity;
@@ -47,6 +51,8 @@ bool list::add(int val) {
 	}
 	return rc;
 }
+
+//******************************************************************************
 
 bool list::deleteAt(unsigned int index) {
 	bool rc = (index > 0 && index <= listCapacity);
@@ -58,6 +64,8 @@ bool list::deleteAt(unsigned int index) {
 	return rc;
 }
 
+//******************************************************************************
+
 int list::readAt(unsigned int index) {
 	int rc = -1; // return -1 if read failed for any reason
 	if (index > 0 && index <= listCapacity) {
@@ -66,6 +74,7 @@ int list::readAt(unsigned int index) {
 	return rc;
 }
 
+//******************************************************************************
 
 void list::printIt() const {
 	for (unsigned int i = 0; i < listCount; i++) {
@@ -73,15 +82,24 @@ void list::printIt() const {
 	}
 }
 
+//******************************************************************************
+
 unsigned int list::getCount() {
 	return listCount;
 }
 
 //******************************************************************************
+
+
+//******************************************************************************
 //				memManager Functions			      //
 //******************************************************************************
 
+
+//******************************************************************************
+
 // Author: Dylan P - 9/17
+
 memManager::memManager(unsigned int policy, unsigned int blockCount) {
     this->policy = policy; // Indicates which fit-policy will be used.
     
@@ -107,6 +125,10 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
     p->next = NULL; // Forward links last node in DLL to NULL
 }
 
+//******************************************************************************
+
+// Author: Josiah W - 9/17
+
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
 	// conditional loop it is.
@@ -118,17 +140,115 @@ memManager::~memManager() {
 	delete p;
 }
 
-int memManager::allocMem(int process_id, int num_units) {}
+//******************************************************************************
+
+// Author: Dylan P - 9/17
+
+int memManager::allocMem(int process_id, int num_units) {
+    int traversalCount = 0; // Return number of nodes traversed, or -1 on fail
+    
+    node *p; // Points to the current working node
+    
+    // Node at which blocks might be allocated if subsequent space is sufficient
+    node *canidate; 
+    unsigned int left; // Index of first free block
+    unsigned int right; // Index of last free block
+    
+    switch (policy) {
+    // Allocates according to specified fit-policy
+        case FIRST:
+            p = memRoot; // Start search for space at beginning of DLL 
+            
+            do {
+            // Repeats until the end of list, or until space is found
+            
+                while (p->next && p->next->pid > -1) {
+                // Find next unallocated node
+                    p = p->next;
+                    
+                    // Tracks number of nodes traversed before space is found
+                    traversalCount++; 
+                }
+                
+                // Set left bound to the first free block (the block directly
+                // after the last allocated node)
+                left = p->start + p->length; 
+                
+                if (p->next) {
+                // If not at end of list...
+                
+                    // The canidate is the first unallocated block
+                    canidate = p->next;
+                    
+                    while (p->next && p->next->pid < 0) {
+                    // Find next allocated node
+                        p = p->next;
+                        
+                        // We don't update traversal here because the canidate
+                        // is staying put, and that's where we'll allocate space
+                    }
+                    
+                    if (p->next) {
+                    // If not at the end of list...
+                    
+                        // Set right bound to the start of allocated node blocks
+                        right = p->next->start;
+                    } else {
+                    // Reached the end of list
+                    
+                        right = blockCount; // Set right bound to end of blocks
+                    }
+                    
+                    if (right - left >= num_units) {
+                    // Sufficient is found to allocate!
+                    
+                        // Populate canidate's node fields with proper values
+                        canidate->pid = process_id; 
+                        canidate->start = left;
+                        canidate->length = num_units;
+                        break; // Exit the searhch, we found what we came for
+                    }
+                    
+                } else {
+                // Reached the end of DLL without finding unallocated node
+                
+                    traversalCount = -1; // There is no space to allocate, stop
+                    break;               // looking for space and return failure
+                }          
+                
+            } while (p->next); // Stop looping at end of list (p->next = NULL)
+     
+            break; // End of first fit policy logic
+        
+        case NEXT:
+            
+            break;
+            
+        case BEST;
+            
+            break;
+            
+        case WORST;
+        
+            break;
+    }
+    
+    return traversalCount;
+        
+}
 
 
 // First fit policy (leftmost allocation):
 // Search through the list until we find the hole, and finishes when it's found
 
+//******************************************************************************
 
 void memManager::deallocMem(int process_id) {
 	// This should just find all blocks with pid = process_id and
 	// assign that value to -1
 }
+
+//******************************************************************************
 
 void memManager::checkLL(int process_id, int num_units) {}
 // Kam:(I think this is good.) We know this outputs the first hole that is big enough, while searching the list for a new hole
