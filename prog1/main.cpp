@@ -85,7 +85,9 @@ int main(int argc, char *argv[]) {
 	memManager **Sims = {man1, man2, man3, man4};
 
 	int mem_rc;
+	int raffle_winner;
 	int unluckyPID;
+	int listCount;
 	for (unsigned int i = 0; i < 4; i++) {
 
 		for (unsigned int j = 0; j < numberOfRequests; j++) {
@@ -108,9 +110,18 @@ int main(int argc, char *argv[]) {
 				allocation_attempts++;
 
 			} else {
-				// Select the lucky winner (process getting terminated)
-				unluckyPID = rand() % (Sims[i]->PIDlist->getCount() - 1);
-				Sims[i]->deallocMem(unluckyPID);		
+				// Select the lucky winner (process getting terminated)		
+				raffle_winner = 
+						rand() % (Sims[i]->PIDlist->getCount() - 1);
+
+				// Get the process id of our winner
+				// unluckyPID = Sims[i]->PIDlist->a[raffle_winner];
+
+				// We want the index instead of the process_id
+				unluckyPID = raffle_winner;
+				// Show him what he's won
+				Sims[i]->deallocMem(unluckyPID);	
+
 			}
 			Sims[i]->countHoles();
 		}

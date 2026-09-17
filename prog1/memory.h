@@ -83,9 +83,11 @@ class node {
 // It's a list(!)
 class list {
 	private:
-		unsigned int *a; // actual contents of the list
 		unsigned int listCount, listCapacity;
 	public:
+		
+		unsigned int *a; // actual contents of the list
+
 		list(unsigned int listCapacity);
 		// Important behavior to note: a capacity of zero means no array.
 		// serves you right. Asking for an empty list smh

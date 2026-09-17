@@ -116,14 +116,6 @@ memManager::~memManager() {
 
 // Author: Josiah
 unsigned int countHoles() {
-
-// Quick references:
-// end of a node is start + length
-// offset is start2 - start1
-// need to keep start1
-// while loop to obtain start2
-// while (next->pid < 0) {} write down start2
-
 	int count = 0;
 	int start1 = 0;
 	int offset;
@@ -158,6 +150,22 @@ int memManager::allocMem(int process_id, int num_units) {}
 void memManager::deallocMem(int process_id) {
 	// This should just find all blocks with pid = process_id and
 	// assign that value to -1
+	bool rc = false;
+	int index = process_id; // make it easier to read
+	
+	int pid = PIDlist->readAt(index); // translate index to process_id
+	node *p = memRoot;
+
+	while (p->pid != pid && p->next != NULL) {
+		p = p->next;
+	}
+	// We've found the unwilling contestant!
+	if (p->pid == pid) {
+		p->pid = -1;
+		PIDlist->deleteAt(index);
+		rc = true;
+	}
+	return rc;
 }
 
 void memManager::checkLL(int process_id, int num_units) {}
