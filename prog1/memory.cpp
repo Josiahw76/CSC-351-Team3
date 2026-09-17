@@ -98,7 +98,7 @@ int memManager::allocMem(int process_id, int num_units) {}
 
 
 // First fit policy (leftmost allocation):
-// Search through the list until 
+// Search through the list until we find the hole, and finishes when it's found
 
 
 void memManager::deallocMem(int process_id) {
