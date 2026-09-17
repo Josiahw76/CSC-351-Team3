@@ -3,6 +3,18 @@
 
 using namespace std;
 
+int process_id = 1;
+int allocation_attempts = 0;
+int agg_hole_counter = 0;	
+int agg_traversal_counter = 0;
+int agg_failure_counter = 0;
+
+int numberOfRequests;
+int percentageOfAllocs;
+
+memManager *man1, *man2, *man3, *man4;
+
+
 // Helper functions
 /******************************************************************************/
 
@@ -22,34 +34,25 @@ int reconstruct_int(char *str) {
 	return reconstructed_int;
 }
 
-// Random number generator
-double rng() {
-	return rand() % 100; // output value is a whole number between 0 and 100
+// Sally shall decide which operation to perform
+bool consult_sally() {
+	return (rand() % 100) < percentageOfAllocs;
 }
 
-bool do_alloc(int percentageOfAllocs) {
-	
-	return
+// Get a value between 3 and 10 for memory allocation
+int getBlockRNG() {
+	return (rand() % 8) + 3;
 }
 
 /******************************************************************************/
 
-memManager *man1, *man2, *man3, *man4;
-
 int main(int argc, char *argv[]) {
     int rc = -1;
 
-    // argv has 4 elements
-    // ./memSim			0
-    // numberOfRequests		1
-    // percentageOfAllocs	2
-    // randomSeed		3
+	numberOfRequests = reconstruct_int(argv[1]);
+	percentageOfAllocs = reconstruct_int(argv[2]);
 
-	int numberOfRequests = reconstruct_int(argv[1]);
-	int percentageOfAllocs = reconstruct_int(argv[2]);
-	int randomSeed = reconstruct_int(argv[3]);
-
-	srand(randomSeed); // Initialize the random number generator
+	srand(reconstruct_int(argv[3])); // Initialize the random number generator
 
 	// Instantiate one object per policy.
 	// These variables are defined in memory.h
@@ -58,13 +61,36 @@ int main(int argc, char *argv[]) {
 	man3 = new memManager(BEST, BLOCK_COUNT);
 	man4 = new memManager(WORST, BLOCK_COUNT);
 	
-	// Our test subjects
+	// This is to help 
 	memManager **Sims = {man1, man2, man3, man4};
 
+	int mem_rc;
 	for (unsigned int i = 0; i < 4; i++) {
+
 		for (unsigned int j = 0; j < numberOfRequests; j++) {
-			Sims[i];		
-	
+
+			// We must defer to Sally's judgement on such matters
+			if (consult_sally()) {
+
+				// getBlockRNG returns a value between 3 and 10
+				mem_rc = Sims[i]->allocMem(process_id, getBlockRNG());
+
+				// Check whether allocMem returned a failure code or real num
+				if (mem_rc != -1) {
+					agg_traversal_counter += mem_rc;
+
+				} else {
+					agg_failure_counter++;
+				}
+
+				process_id++;
+				allocation_attempts++;
+
+			} else {
+				Sims[i]->deallocMem();		
+			}
+
+			Sims[i]->countHoles();
 		}
 	}
 

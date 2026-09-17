@@ -24,14 +24,17 @@ class memManager {
 	private:
         node *memRoot; // Points to the first node in DLL structure
         
-		unsigned int nodeCount;
-        
-        list *PIDlist; // Used to track active Process IDs.
+		unsigned int nodeCount; // Node count of the number of nodes
 
         // 1-4 for fit policies first, next, best, and worst respectively
         unsigned int policy; 
+
         
     public:
+
+		list *PIDlist; // keep track of our active processes
+					   // public so main can see what's inside
+		
         // Constructor that builds an object of blockCount memory blocks which
         // uses the given policy
         memManager(unsigned int policy, unsigned int blockCount); 
