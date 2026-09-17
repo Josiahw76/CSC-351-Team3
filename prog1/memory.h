@@ -23,10 +23,10 @@ const unsigned int WORST = 4;
 class memManager {
 	private:
         node *memRoot; // Points to the first node in DLL structure
-        node *memNext; // Points to the node where search for next fit begins
-        // unsigned int start, length; // ??? ASK SWHEAT ??? 
         
 		unsigned int nodeCount;
+        
+        list *PIDlist; // Used to track active Process IDs.
 
         // 1-4 for fit policies first, next, best, and worst respectively
         unsigned int policy; 

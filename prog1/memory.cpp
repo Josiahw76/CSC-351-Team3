@@ -81,7 +81,31 @@ unsigned int list::getCount() {
 //				memManager Functions			      //
 //******************************************************************************
 
-memManager::memManager(unsigned int policy, unsigned int blockCount) {}
+// Author: Dylan P - 9/17
+memManager::memManager(unsigned int policy, unsigned int blockCount) {
+    this->policy = policy; // Indicates which fit-policy will be used.
+    
+    // Enough nodes to fill storage with 3-block units.
+    nodeCount = blockCount/3; 
+    
+    PIDlist = new list(nodeCount); // At most, one process per node.
+    
+    memRoot = new node(-1, 0, 0); // Root of DLL, linked to null on both sides.
+    
+    node *p = memRoot; // Initialize prev pointer for loop.
+    node *n; // Declares next pointer for.
+    
+    for (unsigned int i = 1; i < nodeCount; i++) {
+    // Iteratively creates the remaining number of needed nodes.
+        // Creates new node, backward linked to its predecessor.
+        p = new node(-1, 0, 0, p); 
+        
+        // Forward links the node before new node to the new node
+        p->prev->next = p; 
+    }
+    
+    p->next = NULL; // Forward links last node in DLL to NULL
+}
 
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
