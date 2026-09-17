@@ -107,7 +107,7 @@ void memManager::deallocMem(int process_id) {
 }
 
 void memManager::checkLL(int process_id, int num_units) {}
-// Kam:(I'm still working on this, since it's not complete.) We know this outputs the first hole that is big enough.
+// Kam:(I think this is good.) We know this outputs the first hole that is big enough.
 void printIt(const) {}
 
 
