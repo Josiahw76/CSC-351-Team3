@@ -134,14 +134,3 @@ void memManager::checkLL(int process_id, int num_units) {}
 // Kam - 9/17: This outputs the first hole that is big enough, while searching the list for a new hole.
 void printIt(const) {}
 
-
-// Policy definitions below:
-
-/*
-First fit. Allocate the first hole that is big enough. Searching can start either at the beginning of the set of holes or at the location where the previous first-fit search ended. We can stop searching as soon as we find a free hole that is large enough.
-
-Best fit. Allocate the smallest hole that is big enough. We must search the entire list, unless the list is ordered by size. This strategy produces the smallest leftover hole.
-
-Worst fit. Allocate the largest hole. Again, we must search the entire list, unless it is sorted by size. This strategy produces the largest leftover hole, which may be more useful than the smaller leftover hole from a best-fit approach.
-
-   */

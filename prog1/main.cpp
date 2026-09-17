@@ -1,3 +1,5 @@
+// Author: Josiah W
+
 #include "memory.h"
 #include <stdlib.h>
 
@@ -61,10 +63,11 @@ int main(int argc, char *argv[]) {
 	man3 = new memManager(BEST, BLOCK_COUNT);
 	man4 = new memManager(WORST, BLOCK_COUNT);
 	
-	// This is to help 
+	// This is to help iterate with loops.
 	memManager **Sims = {man1, man2, man3, man4};
 
 	int mem_rc;
+	int unluckyPID;
 	for (unsigned int i = 0; i < 4; i++) {
 
 		for (unsigned int j = 0; j < numberOfRequests; j++) {
@@ -87,9 +90,10 @@ int main(int argc, char *argv[]) {
 				allocation_attempts++;
 
 			} else {
-				Sims[i]->deallocMem();		
+				// Select the lucky winner (process getting terminated)
+				unluckyPID = rand() % (Sims[i]->PIDlist->getCount() - 1);
+				Sims[i]->deallocMem(unluckyPID);		
 			}
-
 			Sims[i]->countHoles();
 		}
 	}
