@@ -48,6 +48,9 @@ class memManager {
         // If the process indexed by process_id has any memory allocated to it,
         // deallocates that memory
         void deallocMem(int process_id);
+
+		// Returns no. of fragments of 1 or 2 blocks
+		unsigned int countHoles();
         
         // Checks integrity of DLL for improper linkages and length. If list is
         // out of order, the program shall exit with error message identifying
@@ -78,7 +81,6 @@ class node {
 };
 
 // It's a list(!)
-// what does he even do
 class list {
 	private:
 		unsigned int *a; // actual contents of the list

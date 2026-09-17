@@ -7,6 +7,7 @@ using namespace std;
 
 int process_id = 1;
 int allocation_attempts = 0;
+int successful_allocs = 0;
 int agg_hole_counter = 0;	
 int agg_traversal_counter = 0;
 int agg_failure_counter = 0;
@@ -45,6 +46,23 @@ bool consult_sally() {
 int getBlockRNG() {
 	return (rand() % 8) + 3;
 }
+
+// Statistical Functions:
+
+int avg_hole_count() {
+	return agg_hole_counter / successful_allocs;
+}
+
+int avg_traversals() {
+	return agg_traversal_counter / successful_allocs;
+}
+
+double denial_percentage() {
+	return agg_failure_counter / allocation_attempts;
+}
+
+
+
 
 /******************************************************************************/
 

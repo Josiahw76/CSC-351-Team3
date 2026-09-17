@@ -17,11 +17,7 @@ node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, 
 //				List Functions				      //
 //******************************************************************************
 
-// Josiah - I'm just gonna write this out
-//
-// I did some quick testing and this works just fine.
-// Note that it is possible to allocate a list of size zero, just
-// nothing happens when you do so it's pointless.
+// Author: Josiah W
 
 list::list(unsigned int listCapacity) {
 	this->listCapacity = listCapacity;
@@ -116,6 +112,39 @@ memManager::~memManager() {
 		delete p->prev;
 	}
 	delete p;
+}
+
+// Author: Josiah
+unsigned int countHoles() {
+
+// Quick references:
+// end of a node is start + length
+// offset is start2 - start1
+// need to keep start1
+// while loop to obtain start2
+// while (next->pid < 0) {} write down start2
+
+	int count = 0;
+	int start1 = 0;
+	int offset;
+	node *p = memRoot;
+	while (p != NULL) {	
+		while (p->pid < 0 && p->next != NULL) { 
+			p = p->next; 
+		}
+		// Moved forward: either next is null or current is allocated
+		if (p->pid > 0) {
+			offset = p->start - start1;
+			if ((offset > 0) && (offset < 3)) {
+
+				// Offset indicates unallocated blocks between neighboring nodes
+				// between 0 and 3 means 1 or 2, which is a fragment
+				count++;
+			}
+			start1 = p->start + p->length; // Calibrate start position
+		}
+	}	
+	return count;
 }
 
 int memManager::allocMem(int process_id, int num_units) {}
