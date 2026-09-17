@@ -1,3 +1,5 @@
+// Author: Josiah W
+
 #include "memory.h"
 #include <stdlib.h>
 
@@ -5,6 +7,7 @@ using namespace std;
 
 int process_id = 1;
 int allocation_attempts = 0;
+int successful_allocs = 0;
 int agg_hole_counter = 0;	
 int agg_traversal_counter = 0;
 int agg_failure_counter = 0;
@@ -44,6 +47,23 @@ int getBlockRNG() {
 	return (rand() % 8) + 3;
 }
 
+// Statistical Functions:
+
+int avg_hole_count() {
+	return agg_hole_counter / successful_allocs;
+}
+
+int avg_traversals() {
+	return agg_traversal_counter / successful_allocs;
+}
+
+double denial_percentage() {
+	return agg_failure_counter / allocation_attempts;
+}
+
+
+
+
 /******************************************************************************/
 
 int main(int argc, char *argv[]) {
@@ -61,10 +81,13 @@ int main(int argc, char *argv[]) {
 	man3 = new memManager(BEST, BLOCK_COUNT);
 	man4 = new memManager(WORST, BLOCK_COUNT);
 	
-	// This is to help 
+	// This is to help iterate with loops.
 	memManager **Sims = {man1, man2, man3, man4};
 
 	int mem_rc;
+	int raffle_winner;
+	int unluckyPID;
+	int listCount;
 	for (unsigned int i = 0; i < 4; i++) {
 
 		for (unsigned int j = 0; j < numberOfRequests; j++) {
@@ -87,9 +110,19 @@ int main(int argc, char *argv[]) {
 				allocation_attempts++;
 
 			} else {
-				Sims[i]->deallocMem();		
-			}
+				// Select the lucky winner (process getting terminated)		
+				raffle_winner = 
+						rand() % (Sims[i]->PIDlist->getCount() - 1);
 
+				// Get the process id of our winner
+				// unluckyPID = Sims[i]->PIDlist->a[raffle_winner];
+
+				// We want the index instead of the process_id
+				unluckyPID = raffle_winner;
+				// Show him what he's won
+				Sims[i]->deallocMem(unluckyPID);	
+
+			}
 			Sims[i]->countHoles();
 		}
 	}

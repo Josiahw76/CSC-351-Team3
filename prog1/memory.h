@@ -4,9 +4,9 @@
 #define __MEMORY_H
 
 // forward declarations
-class node;
-class list;
-class memManager;
+class node; // 
+class list;/ /  
+class memManager; //
 
 // Use these for simple math
 const unsigned int KB = 1024;
@@ -48,6 +48,9 @@ class memManager {
         // If the process indexed by process_id has any memory allocated to it,
         // deallocates that memory
         void deallocMem(int process_id);
+
+		// Returns no. of fragments of 1 or 2 blocks
+		unsigned int countHoles();
         
         // Checks integrity of DLL for improper linkages and length. If list is
         // out of order, the program shall exit with error message identifying
@@ -78,21 +81,22 @@ class node {
 };
 
 // It's a list(!)
-// what does he even do
 class list {
 	private:
-		unsigned int *a; // actual contents of the list
 		unsigned int listCount, listCapacity;
 	public:
+		
+		unsigned int *a; // actual contents of the list
+
 		list(unsigned int listCapacity);
 		// Important behavior to note: a capacity of zero means no array.
 		// serves you right. Asking for an empty list smh
 		~list();
-		bool add(int val);
-		bool deleteAt(unsigned int index);
-		int readAt(unsigned int index);
-		void printIt() const;
-		unsigned int getCount();
+		bool add(int val); // 
+		bool deleteAt(unsigned int index); // Returns true or false by what's at end of index
+		int readAt(unsigned int index); // Reads data from memory.h
+		void printIt() const; // Prints everything from list
+		unsigned int getCount(); // Outputs whatever is left from memory.h
 };
 
 #endif

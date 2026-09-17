@@ -17,11 +17,7 @@ node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, 
 //				List Functions				      //
 //******************************************************************************
 
-// Josiah - I'm just gonna write this out
-//
-// I did some quick testing and this works just fine.
-// Note that it is possible to allocate a list of size zero, just
-// nothing happens when you do so it's pointless.
+// Author: Josiah W
 
 list::list(unsigned int listCapacity) {
 	this->listCapacity = listCapacity;
@@ -156,6 +152,7 @@ int memManager::allocMem(int process_id, int num_units) {
     
     switch (policy) {
     // Allocates according to specified fit-policy
+    
         case FIRST:
             p = memRoot; // Start search for space at beginning of DLL 
             
@@ -237,31 +234,66 @@ int memManager::allocMem(int process_id, int num_units) {
         
 }
 
+//******************************************************************************
+
+// Author: Josiah
+unsigned int countHoles() {
+	int count = 0;
+	int start1 = 0;
+	int offset;
+	node *p = memRoot;
+	while (p != NULL) {	
+		while (p->pid < 0 && p->next != NULL) { 
+			p = p->next; 
+		}
+		// Moved forward: either next is null or current is allocated
+		if (p->pid > 0) {
+			offset = p->start - start1;
+			if ((offset > 0) && (offset < 3)) {
+
+				// Offset indicates unallocated blocks between neighboring nodes
+				// between 0 and 3 means 1 or 2, which is a fragment
+				count++;
+			}
+			start1 = p->start + p->length; // Calibrate start position
+		}
+	}	
+	return count;
+}
 
 // First fit policy (leftmost allocation):
-// Search through the list until we find the hole, and finishes when it's found
+// Kam - 9/17 (Bottom Line)
+// Search through the list until we find the hole, and finishes when it's found.
 
 //******************************************************************************
 
 void memManager::deallocMem(int process_id) {
 	// This should just find all blocks with pid = process_id and
 	// assign that value to -1
+	bool rc = false;
+	int index = process_id; // make it easier to read
+	
+	int pid = PIDlist->readAt(index); // translate index to process_id
+	node *p = memRoot;
+
+	while (p->pid != pid && p->next != NULL) {
+		p = p->next;
+	}
+	// We've found the unwilling contestant!
+	if (p->pid == pid) {
+		p->pid = -1;
+		PIDlist->deleteAt(index);
+		rc = true;
+	}
+	return rc;
 }
 
 //******************************************************************************
 
 void memManager::checkLL(int process_id, int num_units) {}
-// Kam:(I think this is good.) We know this outputs the first hole that is big enough, while searching the list for a new hole
+// Kam - 9/17: This outputs the first hole that is big enough,
+//while searching the list for a new hole.
+
+
 void printIt(const) {}
 
-
-// Policy definitions below:
-
-/*
-First fit. Allocate the first hole that is big enough. Searching can start either at the beginning of the set of holes or at the location where the previous first-fit search ended. We can stop searching as soon as we find a free hole that is large enough.
-
-Best fit. Allocate the smallest hole that is big enough. We must search the entire list, unless the list is ordered by size. This strategy produces the smallest leftover hole.
-
-Worst fit. Allocate the largest hole. Again, we must search the entire list, unless it is sorted by size. This strategy produces the largest leftover hole, which may be more useful than the smaller leftover hole from a best-fit approach.
-
-   */
