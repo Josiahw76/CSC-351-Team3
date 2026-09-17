@@ -122,7 +122,8 @@ int memManager::allocMem(int process_id, int num_units) {}
 
 
 // First fit policy (leftmost allocation):
-// Search through the list until we find the hole, and finishes when it's found
+// Kam - 9/17 (Bottom Line)
+// Search through the list until we find the hole, and finishes when it's found.
 
 
 void memManager::deallocMem(int process_id) {
@@ -131,6 +132,7 @@ void memManager::deallocMem(int process_id) {
 }
 
 void memManager::checkLL(int process_id, int num_units) {}
-// Kam - 9/17: This outputs the first hole that is big enough, while searching the list for a new hole.
+// Kam - 9/17: This outputs the first hole that is big enough,
+//while searching the list for a new hole.
 void printIt(const) {}
 
