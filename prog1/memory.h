@@ -4,9 +4,9 @@
 #define __MEMORY_H
 
 // forward declarations
-class node;
-class list;
-class memManager;
+class node; // 
+class list;/ /  
+class memManager; //
 
 // Use these for simple math
 const unsigned int KB = 1024;
@@ -88,11 +88,11 @@ class list {
 		// Important behavior to note: a capacity of zero means no array.
 		// serves you right. Asking for an empty list smh
 		~list();
-		bool add(int val);
-		bool deleteAt(unsigned int index);
-		int readAt(unsigned int index);
-		void printIt() const;
-		unsigned int getCount();
+		bool add(int val); // 
+		bool deleteAt(unsigned int index); // 
+		int readAt(unsigned int index); // Reads data from memory.h
+		void printIt() const; // Prints everything from list
+		unsigned int getCount(); // Outputs whatever is left from memory.h
 };
 
 #endif
