@@ -139,7 +139,9 @@ unsigned int countHoles() {
 	return count;
 }
 
-int memManager::allocMem(int process_id, int num_units) {}
+int memManager::allocMem(int process_id, int num_units) {
+	
+}
 
 
 // First fit policy (leftmost allocation):
