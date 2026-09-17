@@ -89,7 +89,7 @@ class list {
 		// serves you right. Asking for an empty list smh
 		~list();
 		bool add(int val); // 
-		bool deleteAt(unsigned int index); // 
+		bool deleteAt(unsigned int index); // Returns true or false by what's at end of index
 		int readAt(unsigned int index); // Reads data from memory.h
 		void printIt() const; // Prints everything from list
 		unsigned int getCount(); // Outputs whatever is left from memory.h
