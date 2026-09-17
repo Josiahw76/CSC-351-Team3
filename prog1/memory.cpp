@@ -131,7 +131,7 @@ void memManager::deallocMem(int process_id) {
 }
 
 void memManager::checkLL(int process_id, int num_units) {}
-// Kam:(I think this is good.) We know this outputs the first hole that is big enough, while searching the list for a new hole
+// Kam - 9/17: This outputs the first hole that is big enough, while searching the list for a new hole.
 void printIt(const) {}
 
 
