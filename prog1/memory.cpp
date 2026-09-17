@@ -101,9 +101,9 @@ void memManager::deallocMem(int process_id) {
 	// assign that value to -1
 }
 
-void memManager::checkLL() {}
-
-void printIt() {}
+void memManager::checkLL(int process_id, int num_units) {}
+// Kam:(I'm still working on this, since it's not complete.) We know this outputs the first hole that is big enough.
+void printIt(const) {}
 
 
 // Policy definitions below:
