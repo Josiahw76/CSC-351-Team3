@@ -359,7 +359,7 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break; // End of best fit logic
             
-        case WORST:
+		case WORST:
 			// Josiah
        		// Finds the largest hole that fits our memory unit and
 			// greedily allocates it
@@ -368,6 +368,7 @@ int memManager::allocMem(int process_id, int num_units) {
 			p = lp = memRoot; // start both at root
 
 			int greatest_size = 0;
+			int offset;
 			left = p->start + p->length; // init left side
 
 			// Move ahead until a gap is discovered
@@ -437,14 +438,12 @@ unsigned int memManager::countHoles() {
 		}
 		p = p->next;
 	}
-	// Simeon K
-	if (blockCount > start1)
-		{
-			offset = blockCount - start1;
-			if (offset == 1 || offset == 2)
-			{
-				count++;
-			}
+	if (128 - start1 < 3) {
+		// If there's a space between the true end of the block segments and
+		// the last allocated blocks, it's a fragment.
+		// Checking for zero is tautologically unnecessary. If it's zero,
+		// we have far bigger problems.
+		count++;	
 	}
 	return count;
 }
