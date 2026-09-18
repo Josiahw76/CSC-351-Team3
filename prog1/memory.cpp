@@ -246,7 +246,7 @@ int memManager::allocMem(int process_id, int num_units) {
                     }
                 }
                 
-                canidate = p; // We might be able to allocate at this node
+                candidate = p; // We might be able to allocate at this node
                 
                 while (p && p->pid < 0) {
                 // Find next allocated node
@@ -260,19 +260,19 @@ int memManager::allocMem(int process_id, int num_units) {
                     }
                 }
                 
-                // Left bound is directly after the node before canidate
-                left = canidate->prev->start + canidate->prev->length
+                // Left bound is directly after the node before candidate
+                left = candidate->prev->start + candidate->prev->length;
                 
                 // Right bound is the beginning of next allocated node
                 right = p->start; 
                 
                 if (right - left >= num_units) {
                 // Sufficient space is found!
-                    // Populate canidate's node fields with proper values
-                    canidate->pid = process_id; 
-                    canidate->start = left;
-                    canidate->length = num_units;
-                    memNext = canidate; // Next search starts after this node
+                    // Populate candidate's node fields with proper values
+                    candidate->pid = process_id; 
+                    candidate->start = left;
+                    candidate->length = num_units;
+                    memNext = candidate; // Next search starts after this node
                     break; // Exit the search, we got what we came for!
                 }
                 
