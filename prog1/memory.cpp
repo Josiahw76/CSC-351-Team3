@@ -122,6 +122,7 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
     memNext = memRoot; // Initially, the next fit pointer starts at first block.
     
     node *p = memRoot; // Initialize prev pointer for loop.
+    node *n; // Declares next pointer for.
     
     for (unsigned int i = 1; i < nodeCount; i++) {
     // Iteratively creates the remaining number of needed nodes.
@@ -163,11 +164,16 @@ int memManager::allocMem(int process_id, int num_units) {
     // Node at which blocks might be allocated if subsequent space is sufficient
     node *candidate; 
     
+<<<<<<< HEAD
+    unsigned int left; // Index of first free block
+    unsigned int right; // Index of last free block
+=======
     int left; // Index of first free block
     int right; // Index of last free block
     int offset; // Number of free blocks
     int minOffset; // Used in best fit
     node *bestFit = NULL; // Used to save place of best fit block space
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
     
     switch (policy) {
     // Allocates according to specified fit-policy
@@ -294,7 +300,11 @@ int memManager::allocMem(int process_id, int num_units) {
             
         case BEST: // Author: Dylan P - 9/18        
             // Starter value to compare against, any offset will be smaller
+<<<<<<< HEAD
+            unsigned int minOffset = blockCount; 
+=======
             minOffset = blockCount; 
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
             
             p = memRoot; // Start search at beginning of DLL
             
@@ -326,7 +336,7 @@ int memManager::allocMem(int process_id, int num_units) {
                     // The offset represents how many blocks are available
                     offset = right - left;
                     
-                    if (offset == num_units) {
+                    if (offset = num_units) {
                     // The tightest space is found
                         // Populate candidate's node fields with proper values
                         candidate->pid = process_id; 
@@ -383,9 +393,9 @@ int memManager::allocMem(int process_id, int num_units) {
 				do {
 					lp = lp->next;
 					traversalCount++;
-				} while (lp != NULL && lp->pid < 0);
+				} while (lp != NULL && lp->pid < 0)
 				// Now, lp is either not real or has found an allocated node
-				if (lp->pid > 0) {
+					if (lp->pid > 0) {
 					offset = lp->start - left;
 					if (offset > greatest_size) {
 						greatest_size = offset;
@@ -406,7 +416,13 @@ int memManager::allocMem(int process_id, int num_units) {
 				// and start the search again
 				p = lp;
 				left = p->start + p->length;
+<<<<<<< HEAD
+			}
+
+			while (p) {
+=======
 			} while (p);
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
 				
             break;
     }
@@ -421,7 +437,7 @@ unsigned int memManager::countHoles() {
 	int count = 0;
 	int start1 = 0;
 	int offset;
-	node *p = memRoot;
+	node *p = memRoot; // Start at the root of the DLL
 	while (p != NULL) {
 		while (p->pid < 0 && p->next != NULL) {
 			p = p->next;
@@ -440,12 +456,14 @@ unsigned int memManager::countHoles() {
 		}
 		p = p->next;
 	}
-	if (128 - start1 < 3) {
-		// If there's a space between the true end of the block segments and
-		// the last allocated blocks, it's a fragment.
-		// Checking for zero is tautologically unnecessary. If it's zero,
-		// we have far bigger problems.
-		count++;	
+	// Simeon K
+	if (blockCount > start1) // If the last node is not at the end of the memory blocks, check for the remaining blocks
+		{
+			offset = blockCount - start1; // offset between the last node and the end of the memory blocks
+			if (offset == 1 || offset == 2) // it means there are 1 or 2 unallocated blocks at the end of the memory blocks, which is a fragment
+			{
+				count++; // Increment the count of fragments
+			}
 	}
 	return count;
 }
@@ -520,15 +538,15 @@ void memManager::checkLL() {
 
 // Author: Simeon K - 9/18
 
-void memManager::printIt()
+void memManager::printIt() // Prints all the nodes' attributes.
 {
-    node *p = memRoot;
-    while (p != NULL)
+    node *p = memRoot; // Start at the root of the DLL
+    while (p != NULL) 
     {
         std::cout << "PID: " << p->pid << ", Start: " << p->start << 
         ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << 
-        p->next << std::endl;
-        p = p->next;
+        p->next << std::endl; // Print the attributes of the current node
+        p = p->next; // Move to the next node in the DLL
     }
 }
 
