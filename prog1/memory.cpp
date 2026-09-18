@@ -354,16 +354,54 @@ int memManager::allocMem(int process_id, int num_units) {
 			// Josiah
        		// Finds the largest hole that fits our memory unit and
 			// greedily allocates it
-			p = memRoot;
+
+			node *lp; // lookahead
+			p = lp = memRoot; // start both at root
+
+			int greatest_size = 0;
+			left = p->start + p->length; // init left side
+
+			// Move ahead until a gap is discovered
+			// gap is start2 - (start1 + length1)
+			//
+			// have to move forward pointer until a real node is found
+			// once we find a measurable gap, record what we find
+
+			while (true) {
+				do {
+					lp = lp->next;
+					traversalCount++;
+				} while (lp != NULL && lp->pid < 0)
+				// Now, lp is either not real or has found an allocated node
+				if (lp->pid > 0) {
+					offset = lp->start - left;
+					if (offset > greatest_size) {
+						greatest_size = offset;
+						candidate = p;
+					}
+				} else {
+					// Else means that lp was null, so we have to break
+					offset = 128 - left; // Check how far we are from the 
+										 // true end of the blocks
+					// Run the same size check logic
+					if (offset > greatest_size) {
+						greatest_size = offset;
+						candidate = p;
+					}
+					break;
+				}
+				// Set our new left side to the current node
+				// and start the search again
+				p = lp;
+				left = p->start + p->length;
+			}
 
 			while (p) { }
 				
-
+			}
             break;
     }
-    
     return traversalCount;
-        
 }
 
 //******************************************************************************
@@ -397,7 +435,6 @@ unsigned int memManager::countHoles() {
 	if (blockCount > start1)
 		{
 			offset = blockCount - start1;
-
 			if (offset == 1 || offset == 2)
 			{
 				count++;
@@ -430,9 +467,35 @@ void memManager::deallocMem(int process_id) {
 
 //******************************************************************************
 
-void memManager::checkLL() {}
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
+void memManager::checkLL() { 
+	node *p = memRoot; // Start at the root 
+	node *prev = NULL; // Initialize prev pointer to NULL
+	unsigned int visited = 0; // Count of nodes visited
+	while (p != NULL) { // While we haven't reached the end
+
+		if (visited >= nodeCount) {
+			std::cerr << "Error: DLL visited length exceeds expected node count of " << nodeCount << std::endl; // If we have visited more nodes than expected, print error message and exit
+			exit(EXIT_FAILURE); // Exit the program with failure status
+		}
+
+		if (p->prev != prev) { // Check if the prev pointer of the current node is correct
+			std::cerr << "Error: Improper linkage at node " << visited << ". Expected" << nodeCount << " nodes." << std::endl; // If not, print error message and exit
+			exit(EXIT_FAILURE); //
+		}
+
+		prev = p; // Update prev pointer to current node
+		p = p->next; // Move to the next node
+		visited++; // Increment count of nodes visited
+	}
+
+	if (visited != nodeCount) { // Check if the number of nodes visited is equal to the expected node count
+		std::cerr << "Error: DLL length mismatch. Expected " << nodeCount << ", but visited " << visited << std::endl; // If not, print error message and exit
+		exit(EXIT_FAILURE); // Exit the program with failure status
+
+	}
+}
 
 //******************************************************************************
 
@@ -449,6 +512,5 @@ void memManager::printIt()
         p = p->next;
     }
 }
-
 
 
