@@ -17,10 +17,10 @@ const unsigned int MAX_MEM = 256 * KB;
 const int BLOCK_COUNT = 128;
 
 // Policy variables
-const unsigned int FIRST = 1;
-const unsigned int NEXT = 2;
-const unsigned int BEST = 3;
-const unsigned int WORST = 4;
+const unsigned int FIRST = 0;
+const unsigned int NEXT = 1;
+const unsigned int BEST = 2;
+const unsigned int WORST = 3;
 
 
 class memManager {

@@ -2,6 +2,7 @@
 
 #include "memory.h"
 #include <stdlib.h>
+#include <iostream>
 
 using namespace std;
 
@@ -60,6 +61,25 @@ int avg_traversals() {
 double denial_percentage() {
 	return agg_failure_counter / allocation_attempts;
 }
+// Lazy string return function
+char* getPolicyName(unsigned int policy) {
+	char* returnPolicy;
+	switch (policy) {
+		case FIRST:
+		returnPolicy = "firstFit";
+		break;
+		case NEXT:
+		returnPolicy = "nextFit";
+		break;
+		case BEST:
+		returnPolicy = "bestFit";
+		break;
+		case WORST:
+		returnPolicy = "worstFit";
+		break;
+	}
+	return returnPolicy;
+}
 
 
 /******************************************************************************/
@@ -75,26 +95,29 @@ int main(int argc, char *argv[]) {
 	// Instantiate one object per policy.
 	// These variables are defined in memory.h
 	man1 = new memManager(FIRST, BLOCK_COUNT);
-	// man2 = new memManager(NEXT, BLOCK_COUNT);
-	// man3 = new memManager(BEST, BLOCK_COUNT);
-	// man4 = new memManager(WORST, BLOCK_COUNT);
+	man2 = new memManager(NEXT, BLOCK_COUNT);
+	man3 = new memManager(BEST, BLOCK_COUNT);
+	man4 = new memManager(WORST, BLOCK_COUNT);
 	
 	// This is to help iterate with loops.
 	
-	// memManager **Sims = {man1, man2, man3, man4};
-	memManager **Sims = new memManager*[1];
+	memManager **Sims = new memManager*[4];
 	Sims[0] = man1;
-
-	//memManager *Sims[] = {man1, man2, man3, man4};
-
+	Sims[1] = man2;
+	Sims[2] = man3;
+	Sims[3] = man4;
 
 	int mem_rc;
 	int raffle_winner;
 	int unluckyPID;
 	int listCount;
+
+	cout << "Running with the following settings: \n" << 
+			"Operation count =\t" << numberOfRequests << 
+			"\nRequest percent =\t" << percentageOfAllocs << 
+			"\nRNG seed =\t\t" << argv[3];
 	
-	//for (unsigned int i = 0; i < 4; i++) {
-	unsigned int i = 0;
+	for (unsigned int i = 0; i < 4; i++) {
 		for (int j = 0; j < numberOfRequests; j++) {
 
 			// We must defer to Sally's judgement on such matters
@@ -128,10 +151,15 @@ int main(int argc, char *argv[]) {
 				Sims[i]->deallocMem(unluckyPID);	
 
 			}
-			Sims[i]->checkLL();
 			Sims[i]->countHoles();
 		}
-	// }
+		cout << "\nStats for \n" << getPolicyName(i)
+			 << "\nAve holes = " << avg_hole_count()
+			 << "\nAve traversals = " << avg_traversals()
+			 << "\nDenials = " << denial_percentage() << "\n\n";
+	}
+	
+	
 
     return rc;
 }
