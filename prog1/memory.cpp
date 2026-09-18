@@ -162,8 +162,16 @@ int memManager::allocMem(int process_id, int num_units) {
     // Node at which blocks might be allocated if subsequent space is sufficient
     node *candidate; 
     
+<<<<<<< HEAD
     unsigned int left; // Index of first free block
     unsigned int right; // Index of last free block
+=======
+    int left; // Index of first free block
+    int right; // Index of last free block
+    int offset; // Number of free blocks
+    int minOffset; // Used in best fit
+    node *bestFit = NULL; // Used to save place of best fit block space
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
     
     switch (policy) {
     // Allocates according to specified fit-policy
@@ -289,10 +297,12 @@ int memManager::allocMem(int process_id, int num_units) {
             break; // End of next-fit policy
             
         case BEST: // Author: Dylan P - 9/18        
-            node *bestFit; // Used to save place of best fit block space
-            
             // Starter value to compare against, any offset will be smaller
+<<<<<<< HEAD
             unsigned int minOffset = blockCount; 
+=======
+            minOffset = blockCount; 
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
             
             p = memRoot; // Start search at beginning of DLL
             
@@ -349,9 +359,17 @@ int memManager::allocMem(int process_id, int num_units) {
                 
             } while (p->next); // No need to continue, nothing left to search
             
+            if (bestFit) {
+            // If we found a fit...
+                // Populate the best fit's node fields with proper values
+                bestFit->pid = process_id; 
+                bestFit->start = left;
+                bestFit->length = num_units;
+            }
+            
             break; // End of best fit logic
             
-        case WORST:
+		case WORST:
 			// Josiah
        		// Finds the largest hole that fits our memory unit and
 			// greedily allocates it
@@ -360,6 +378,7 @@ int memManager::allocMem(int process_id, int num_units) {
 			p = lp = memRoot; // start both at root
 
 			int greatest_size = 0;
+			int offset;
 			left = p->start + p->length; // init left side
 
 			// Move ahead until a gap is discovered
@@ -395,11 +414,14 @@ int memManager::allocMem(int process_id, int num_units) {
 				// and start the search again
 				p = lp;
 				left = p->start + p->length;
+<<<<<<< HEAD
 			}
 
 			while (p) {
+=======
+			} while (p);
+>>>>>>> 8e371137e83e0a80ce7890eeee077f2be934a452
 				
-			}
             break;
     }
     return traversalCount;
