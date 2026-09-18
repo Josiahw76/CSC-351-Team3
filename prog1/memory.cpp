@@ -33,12 +33,14 @@ list::list(unsigned int listCapacity) {
 
 //******************************************************************************
 
+// Josiah W
 list::~list() {
 	if (a != NULL) { delete [] a; } // If a exists, delete it.
 }
 
 //******************************************************************************
 
+// Josiah W
 bool list::add(int val) {
 	bool rc = listCount < listCapacity;
 	if (rc) {
@@ -50,6 +52,7 @@ bool list::add(int val) {
 
 //******************************************************************************
 
+// Josiah W
 bool list::deleteAt(unsigned int index)
 {
 	bool rc = (index < listCount);
@@ -64,6 +67,7 @@ bool list::deleteAt(unsigned int index)
 
 //******************************************************************************
 
+// Josiah W
 int list::readAt(unsigned int index) const
 {
 	int rc = -1; // return -1 if read failed for any reason
@@ -76,6 +80,7 @@ int list::readAt(unsigned int index) const
 
 //******************************************************************************
 
+// Josiah W
 void list::printIt() const {
 	for (unsigned int i = 0; i < listCount; i++) {
 		std::cout << a[i] << std::endl;
@@ -84,6 +89,7 @@ void list::printIt() const {
 
 //******************************************************************************
 
+// Josiah W
 unsigned int list::getCount() {
 	return listCount;
 }
@@ -135,7 +141,7 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
 	// conditional loop it is.
-	node *p = memRoot; //first doesnt exist, so we have to start at the root -SK
+	node *p = memRoot;
 
 	while (p->next != NULL) {
 		p = p->next;
@@ -262,7 +268,7 @@ int memManager::allocMem(int process_id, int num_units) {
                 }
                 
                 // Left bound is directly after the node before candidate
-                left = candidate->prev->start + candidate->prev->length
+                left = candidate->prev->start + candidate->prev->length;
                 
                 // Right bound is the beginning of next allocated node
                 right = p->start; 
@@ -333,8 +339,15 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break;
             
-        case WORST: //a case label should end with a colon, not a semicolon.
-        
+        case WORST:
+			// Josiah
+       		// Finds the largest hole that fits our memory unit and
+			// greedily allocates it
+			p = memRoot;
+
+			while (p) {
+				
+
             break;
     }
     
@@ -346,25 +359,20 @@ int memManager::allocMem(int process_id, int num_units) {
 
 // Author: Josiah
 
-unsigned int memManager::countHoles()
-{ // added memManager so that it can access the private members of the class
+unsigned int memManager::countHoles() {
 	int count = 0;
 	int start1 = 0;
 	int offset;
 	node *p = memRoot;
-	while (p != NULL)
-	{
-		while (p->pid < 0 && p->next != NULL)
-		{
+	while (p != NULL) {
+		while (p->pid < 0 && p->next != NULL) {
 			p = p->next;
 		}
 
 		// Moved forward: either next is null or current is allocated
-		if (p->pid >= 0)
-		{
+		if (p->pid >= 0) {
 			offset = p->start - start1;
-			if ((offset > 0) && (offset < 3))
-			{
+			if ((offset > 0) && (offset < 3)) {
 
 				// Offset indicates unallocated blocks between neighboring nodes
 				// between 0 and 3 means 1 or 2, which is a fragment
@@ -374,7 +382,8 @@ unsigned int memManager::countHoles()
 		}
 		p = p->next;
 	}
-		if (blockCount > start1)
+	// Simeon K
+	if (blockCount > start1)
 		{
 			offset = blockCount - start1;
 
@@ -382,13 +391,9 @@ unsigned int memManager::countHoles()
 			{
 				count++;
 			}
-		}
-		return count;
 	}
-
-// First fit policy (leftmost allocation):
-// Kam - 9/17 (Bottom Line)
-// Search through the list until we find the hole, and finishes when it's found.
+	return count;
+}
 
 //******************************************************************************
 
