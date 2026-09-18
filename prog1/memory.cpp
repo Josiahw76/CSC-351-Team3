@@ -5,7 +5,8 @@
 //				Node Function				      //
 //******************************************************************************
 
-node::node(int pid, unsigned int start, unsigned int length, node *prev, node *next) {
+node::node(int pid, unsigned int start, unsigned int length, 
+           node *prev, node *next) {
 	this->pid = pid;
 	this->start = start;
 	this->length = length;
@@ -109,7 +110,8 @@ unsigned int list::getCount() {
 memManager::memManager(unsigned int policy, unsigned int blockCount) {
     this->policy = policy; // Indicates which fit-policy will be used.
 
-	this->blockCount = blockCount; //Indicates how many blocks of memory are available for allocation.
+    //Indicates how many blocks of memory are available for allocation.
+	this->blockCount = blockCount; 
     
     // Enough nodes to fill storage with 3-block units.
     nodeCount = blockCount/3; 
@@ -474,6 +476,9 @@ void memManager::deallocMem(int process_id) {
 
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
+
+// Author: Simeon K - 9/18
+
 void memManager::checkLL() { 
 	node *p = memRoot; // Start at the root 
 	node *prev = NULL; // Initialize prev pointer to NULL
@@ -481,12 +486,18 @@ void memManager::checkLL() {
 	while (p != NULL) { // While we haven't reached the end
 
 		if (visited >= nodeCount) {
-			std::cerr << "Error: DLL visited length exceeds expected node count of " << nodeCount << std::endl; // If we have visited more nodes than expected, print error message and exit
+			std::cerr << 
+            "Error: DLL visited length exceeds expected node count of " << 
+            nodeCount << std::endl; // If we have visited more nodes than 
+                                    // expected, print error message and exit
 			exit(EXIT_FAILURE); // Exit the program with failure status
 		}
 
-		if (p->prev != prev) { // Check if the prev pointer of the current node is correct
-			std::cerr << "Error: Improper linkage at node " << visited << ". Expected" << nodeCount << " nodes." << std::endl; // If not, print error message and exit
+        // Check if the prev pointer of the current node is correct
+		if (p->prev != prev) { 
+			std::cerr << "Error: Improper linkage at node " << visited <<
+            ". Expected" << nodeCount << " nodes." << std::endl; 
+            // If not, print error message and exit
 			exit(EXIT_FAILURE); //
 		}
 
@@ -495,10 +506,13 @@ void memManager::checkLL() {
 		visited++; // Increment count of nodes visited
 	}
 
-	if (visited != nodeCount) { // Check if the number of nodes visited is equal to the expected node count
-		std::cerr << "Error: DLL length mismatch. Expected " << nodeCount << ", but visited " << visited << std::endl; // If not, print error message and exit
-		exit(EXIT_FAILURE); // Exit the program with failure status
-
+    // Check if the number of nodes visited is equal to the expected node count
+	if (visited != nodeCount) { 
+		std::cerr << "Error: DLL length mismatch. Expected " << nodeCount << 
+        ", but visited " << visited << std::endl; // If not, print error 
+                                                  // message and exit
+		
+        exit(EXIT_FAILURE); // Exit the program with failure status
 	}
 }
 
