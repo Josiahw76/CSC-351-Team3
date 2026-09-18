@@ -98,6 +98,8 @@ unsigned int list::getCount() {
 
 memManager::memManager(unsigned int policy, unsigned int blockCount) {
     this->policy = policy; // Indicates which fit-policy will be used.
+
+	this->blockCount = blockCount; //Indicates how many blocks of memory are available for allocation.
     
     // Enough nodes to fill storage with 3-block units.
     nodeCount = blockCount/3; 
@@ -105,6 +107,7 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
     PIDlist = new list(nodeCount); // At most, one process per node.
     
     memRoot = new node(-1, 0, 0); // Root of DLL, linked to null on both sides.
+    memNext = memRoot; // Initially, the next fit pointer starts at first block.
     
     node *p = memRoot; // Initialize prev pointer for loop.
     node *n; // Declares next pointer for.
@@ -128,7 +131,8 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
 	// conditional loop it is.
-	node *p = memRoot;
+	node *p = memRoot; //first doesnt exist, so we have to start at the root -SK
+
 	while (p->next != NULL) {
 		p = p->next;
 		delete p->prev;
@@ -197,7 +201,7 @@ int memManager::allocMem(int process_id, int num_units) {
                     }
                     
                     if (right - left >= num_units) {
-                    // Sufficient is found to allocate!
+                    // Sufficient space is found to allocate!
                     
                         // Populate candidate's node fields with proper values
                         candidate->pid = process_id; 
@@ -218,14 +222,66 @@ int memManager::allocMem(int process_id, int num_units) {
             break; // End of first fit policy logic
         
         case NEXT:
+            p = memNext; // Begin search at the saved next-fit position
+            
+            do {
+            // Repeat until space is found or whole DLL is searched
+                while (p && p->pid > -1) {
+                // Find next unallocated node
+                    if (p->next) {
+                        p = p->next; // Move to next node if not at end of DLL
+                    } else {
+                        p = memRoot; // Move to start if at end of DLL
+                    }
+                    
+                    traversalCount++; // Account for traversed node
+                    
+                    if (p == memNext) {
+                        traversalCount = -1; // Could not find spacce in DLL
+                        break;
+                    }
+                }
+                
+                canidate = p; // We might be able to allocate at this node
+                
+                while (p && p->pid < 0) {
+                // Find next allocated node
+                    if (p->next) {
+                        p = p->next; // Move to next node if not at end of DLL
+                    } else {
+                        p = memRoot; // Move to start if at end of DLL
+                    }
+                    if (p == memNext) {
+                        break;
+                    }
+                }
+                
+                // Left bound is directly after the node before canidate
+                left = canidate->prev->start + canidate->prev->length
+                
+                // Right bound is the beginning of next allocated node
+                right = p->start; 
+                
+                if (right - left >= num_units) {
+                // Sufficient space is found!
+                    // Populate canidate's node fields with proper values
+                    canidate->pid = process_id; 
+                    canidate->start = left;
+                    canidate->length = num_units;
+                    memNext = canidate; // Next search starts after this node
+                    break; // Exit the search, we got what we came for!
+                }
+                
+            } while (traversalCount > -1); 
+            // Ends once every node up until memNext is checked
+            
+            break; // End of next-fit policy
+            
+        case BEST: //a case label should end with a colon, not a semicolon.
             
             break;
             
-	case BEST:
-            
-            break;
-            
-	case WORST:
+        case WORST: //a case label should end with a colon, not a semicolon.
         
             break;
     }
@@ -237,7 +293,7 @@ int memManager::allocMem(int process_id, int num_units) {
 //******************************************************************************
 
 // Author: Josiah
-unsigned int countHoles() {
+unsigned int memManager::countHoles() { //added memManager so that it can access the private members of the class
 	int count = 0;
 	int start1 = 0;
 	int offset;
@@ -294,5 +350,7 @@ void memManager::checkLL() {}
 //while searching the list for a new hole.
 
 
-void printIt() const {}
+void memManager::printIt() const {}
+
+
 

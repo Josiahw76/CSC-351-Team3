@@ -80,9 +80,13 @@ int main(int argc, char *argv[]) {
 	// man4 = new memManager(WORST, BLOCK_COUNT);
 	
 	// This is to help iterate with loops.
+	
 	// memManager **Sims = {man1, man2, man3, man4};
 	memManager **Sims = new memManager*[1];
 	Sims[0] = man1;
+
+	//memManager *Sims[] = {man1, man2, man3, man4};
+
 
 	int mem_rc;
 	int raffle_winner;

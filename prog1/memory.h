@@ -2,10 +2,12 @@
 
 #ifndef __MEMORY_H
 #define __MEMORY_H
+#include <cstddef>
 
 #include <stdio.h>
 
 // forward declarations
+
 class node;
 class list;
 class memManager;
@@ -25,8 +27,11 @@ const unsigned int WORST = 4;
 class memManager {
 	private:
         node *memRoot; // Points to the first node in DLL structure
+        node *memNext; // Points to the node for which next-fit begins search
         
 		unsigned int nodeCount; // Node count of the number of nodes
+
+		unsigned int blockCount;
 
         // 1-4 for fit policies first, next, best, and worst respectively
         unsigned int policy; 
@@ -72,7 +77,6 @@ class node {
 		unsigned int length; // number of blocks represented by this node
 		node *prev; // Left pointer, if first it's null
 		node *next; // Right pointer, if last it's null
-
 	
 	public:
 		node(int pid, unsigned int start, unsigned int length,
