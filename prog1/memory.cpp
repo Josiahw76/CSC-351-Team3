@@ -163,6 +163,9 @@ int memManager::allocMem(int process_id, int num_units) {
     
     int left; // Index of first free block
     int right; // Index of last free block
+    int offset; // Number of free blocks
+    int minOffset; // Used in best fit
+    node *bestFit = NULL; // Used to save place of best fit block space
     
     switch (policy) {
     // Allocates according to specified fit-policy
@@ -288,10 +291,8 @@ int memManager::allocMem(int process_id, int num_units) {
             break; // End of next-fit policy
             
         case BEST: // Author: Dylan P - 9/18        
-            node *bestFit; // Used to save place of best fit block space
-            
             // Starter value to compare against, any offset will be smaller
-            int minOffset = blockCount; 
+            minOffset = blockCount; 
             
             p = memRoot; // Start search at beginning of DLL
             
@@ -321,7 +322,7 @@ int memManager::allocMem(int process_id, int num_units) {
                     right = p->start; 
                     
                     // The offset represents how many blocks are available
-                    int offset = right - left;
+                    offset = right - left;
                     
                     if (offset == num_units) {
                     // The tightest space is found
@@ -348,6 +349,14 @@ int memManager::allocMem(int process_id, int num_units) {
                 
             } while (p->next); // No need to continue, nothing left to search
             
+            if (bestFit) {
+            // If we found a fit...
+                // Populate the best fit's node fields with proper values
+                bestFit->pid = process_id; 
+                bestFit->start = left;
+                bestFit->length = num_units;
+            }
+            
             break; // End of best fit logic
             
         case WORST:
@@ -371,7 +380,7 @@ int memManager::allocMem(int process_id, int num_units) {
 				do {
 					lp = lp->next;
 					traversalCount++;
-				} while (lp != NULL && lp->pid < 0)
+				} while (lp != NULL && lp->pid < 0);
 				// Now, lp is either not real or has found an allocated node
 				if (lp->pid > 0) {
 					offset = lp->start - left;
@@ -394,11 +403,8 @@ int memManager::allocMem(int process_id, int num_units) {
 				// and start the search again
 				p = lp;
 				left = p->start + p->length;
-			}
-
-			while (p) { }
+			} while (p);
 				
-			}
             break;
     }
     return traversalCount;
