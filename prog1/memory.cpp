@@ -50,9 +50,11 @@ bool list::add(int val) {
 
 //******************************************************************************
 
-bool list::deleteAt(unsigned int index) {
-	bool rc = (index > 0 && index <= listCapacity);
-	if (rc) {
+bool list::deleteAt(unsigned int index)
+{
+	bool rc = (index < listCount);
+	if (rc)
+	{
 		// decrement before to account for zero indexing
 		listCount--;
 		a[index] = a[listCount];
@@ -62,9 +64,11 @@ bool list::deleteAt(unsigned int index) {
 
 //******************************************************************************
 
-int list::readAt(unsigned int index) {
+int list::readAt(unsigned int index) const
+{
 	int rc = -1; // return -1 if read failed for any reason
-	if (index > 0 && index <= listCapacity) {
+	if (index < listCount)
+	{
 		rc = a[index];
 	}
 	return rc;
@@ -293,19 +297,25 @@ int memManager::allocMem(int process_id, int num_units) {
 //******************************************************************************
 
 // Author: Josiah
-unsigned int memManager::countHoles() { //added memManager so that it can access the private members of the class
+unsigned int memManager::countHoles()
+{ // added memManager so that it can access the private members of the class
 	int count = 0;
 	int start1 = 0;
 	int offset;
 	node *p = memRoot;
-	while (p != NULL) {	
-		while (p->pid < 0 && p->next != NULL) { 
-			p = p->next; 
+	while (p != NULL)
+	{
+		while (p->pid < 0 && p->next != NULL)
+		{
+			p = p->next;
 		}
+
 		// Moved forward: either next is null or current is allocated
-		if (p->pid > 0) {
+		if (p->pid >= 0)
+		{
 			offset = p->start - start1;
-			if ((offset > 0) && (offset < 3)) {
+			if ((offset > 0) && (offset < 3))
+			{
 
 				// Offset indicates unallocated blocks between neighboring nodes
 				// between 0 and 3 means 1 or 2, which is a fragment
@@ -313,9 +323,19 @@ unsigned int memManager::countHoles() { //added memManager so that it can access
 			}
 			start1 = p->start + p->length; // Calibrate start position
 		}
-	}	
-	return count;
-}
+		p = p->next;
+	}
+		if (blockCount > start1)
+		{
+			offset = blockCount - start1;
+
+			if (offset == 1 || offset == 2)
+			{
+				count++;
+			}
+		}
+		return count;
+	}
 
 // First fit policy (leftmost allocation):
 // Kam - 9/17 (Bottom Line)
@@ -350,7 +370,15 @@ void memManager::checkLL() {}
 //while searching the list for a new hole.
 
 
-void memManager::printIt() const {}
+	void memManager::printIt()
+	{
+		node *p = memRoot;
+		while (p != NULL)
+		{
+			std::cout << "PID: " << p->pid << ", Start: " << p->start << ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << p->next << std::endl;
+			p = p->next;
+		}
+	}
 
 
 
