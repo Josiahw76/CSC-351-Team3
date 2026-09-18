@@ -3,10 +3,12 @@
 #ifndef __MEMORY_H
 #define __MEMORY_H
 
+#include <stdio.h>
+
 // forward declarations
-class node; // 
-class list;/ /  
-class memManager; //
+class node;
+class list;
+class memManager;
 
 // Use these for simple math
 const unsigned int KB = 1024;
@@ -70,14 +72,13 @@ class node {
 		unsigned int length; // number of blocks represented by this node
 		node *prev; // Left pointer, if first it's null
 		node *next; // Right pointer, if last it's null
-		unsigned int start, length; // tracks memory blocks
-		node *prev, *next; // DLL left/right pointers
+
 	
 	public:
 		node(int pid, unsigned int start, unsigned int length,
 						node *prev = NULL, node *next = NULL);
 
-	friend memManager; // Friends are ones who can access your private members
+		friend memManager; // Friends are ones who can access your private members
 };
 
 // It's a list(!)

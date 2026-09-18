@@ -5,7 +5,7 @@
 //				Node Function				      //
 //******************************************************************************
 
-node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, node *next = NULL) {
+node::node(int pid, unsigned int start, unsigned int length, node *prev, node *next) {
 	this->pid = pid;
 	this->start = start;
 	this->length = length;
@@ -128,7 +128,7 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
 	// conditional loop it is.
-	node *p = first;
+	node *p = memRoot;
 	while (p->next != NULL) {
 		p = p->next;
 		delete p->prev;
@@ -146,7 +146,7 @@ int memManager::allocMem(int process_id, int num_units) {
     node *p; // Points to the current working node
     
     // Node at which blocks might be allocated if subsequent space is sufficient
-    node *canidate; 
+    node *candidate; 
     unsigned int left; // Index of first free block
     unsigned int right; // Index of last free block
     
@@ -174,14 +174,14 @@ int memManager::allocMem(int process_id, int num_units) {
                 if (p->next) {
                 // If not at end of list...
                 
-                    // The canidate is the first unallocated block
-                    canidate = p->next;
+                    // The candidate is the first unallocated block
+                    candidate = p->next;
                     
                     while (p->next && p->next->pid < 0) {
                     // Find next allocated node
                         p = p->next;
                         
-                        // We don't update traversal here because the canidate
+                        // We don't update traversal here because the candidate
                         // is staying put, and that's where we'll allocate space
                     }
                     
@@ -199,10 +199,10 @@ int memManager::allocMem(int process_id, int num_units) {
                     if (right - left >= num_units) {
                     // Sufficient is found to allocate!
                     
-                        // Populate canidate's node fields with proper values
-                        canidate->pid = process_id; 
-                        canidate->start = left;
-                        canidate->length = num_units;
+                        // Populate candidate's node fields with proper values
+                        candidate->pid = process_id; 
+                        candidate->start = left;
+                        candidate->length = num_units;
                         break; // Exit the searhch, we found what we came for
                     }
                     
@@ -221,11 +221,11 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break;
             
-        case BEST;
+	case BEST:
             
             break;
             
-        case WORST;
+	case WORST:
         
             break;
     }
@@ -267,10 +267,11 @@ unsigned int countHoles() {
 
 //******************************************************************************
 
+// Author - Josiah
+
 void memManager::deallocMem(int process_id) {
 	// This should just find all blocks with pid = process_id and
 	// assign that value to -1
-	bool rc = false;
 	int index = process_id; // make it easier to read
 	
 	int pid = PIDlist->readAt(index); // translate index to process_id
@@ -283,17 +284,15 @@ void memManager::deallocMem(int process_id) {
 	if (p->pid == pid) {
 		p->pid = -1;
 		PIDlist->deleteAt(index);
-		rc = true;
 	}
-	return rc;
 }
 
 //******************************************************************************
 
-void memManager::checkLL(int process_id, int num_units) {}
+void memManager::checkLL() {}
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
 
 
-void printIt(const) {}
+void printIt() const {}
 

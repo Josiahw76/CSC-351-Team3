@@ -62,8 +62,6 @@ double denial_percentage() {
 }
 
 
-
-
 /******************************************************************************/
 
 int main(int argc, char *argv[]) {
@@ -77,20 +75,23 @@ int main(int argc, char *argv[]) {
 	// Instantiate one object per policy.
 	// These variables are defined in memory.h
 	man1 = new memManager(FIRST, BLOCK_COUNT);
-	man2 = new memManager(NEXT, BLOCK_COUNT);
-	man3 = new memManager(BEST, BLOCK_COUNT);
-	man4 = new memManager(WORST, BLOCK_COUNT);
+	// man2 = new memManager(NEXT, BLOCK_COUNT);
+	// man3 = new memManager(BEST, BLOCK_COUNT);
+	// man4 = new memManager(WORST, BLOCK_COUNT);
 	
 	// This is to help iterate with loops.
-	memManager **Sims = {man1, man2, man3, man4};
+	// memManager **Sims = {man1, man2, man3, man4};
+	memManager **Sims = new memManager*[1];
+	Sims[0] = man1;
 
 	int mem_rc;
 	int raffle_winner;
 	int unluckyPID;
 	int listCount;
-	for (unsigned int i = 0; i < 4; i++) {
-
-		for (unsigned int j = 0; j < numberOfRequests; j++) {
+	
+	//for (unsigned int i = 0; i < 4; i++) {
+	unsigned int i = 0;
+		for (int j = 0; j < numberOfRequests; j++) {
 
 			// We must defer to Sally's judgement on such matters
 			if (consult_sally()) {
@@ -125,7 +126,7 @@ int main(int argc, char *argv[]) {
 			}
 			Sims[i]->countHoles();
 		}
-	}
+	// }
 
     return rc;
 }
