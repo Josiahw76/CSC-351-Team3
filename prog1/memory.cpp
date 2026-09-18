@@ -155,6 +155,7 @@ int memManager::allocMem(int process_id, int num_units) {
     
     // Node at which blocks might be allocated if subsequent space is sufficient
     node *candidate; 
+    
     unsigned int left; // Index of first free block
     unsigned int right; // Index of last free block
     
@@ -246,7 +247,7 @@ int memManager::allocMem(int process_id, int num_units) {
                     }
                 }
                 
-                canidate = p; // We might be able to allocate at this node
+                candidate = p; // We might be able to allocate at this node
                 
                 while (p && p->pid < 0) {
                 // Find next allocated node
@@ -260,19 +261,19 @@ int memManager::allocMem(int process_id, int num_units) {
                     }
                 }
                 
-                // Left bound is directly after the node before canidate
-                left = canidate->prev->start + canidate->prev->length
+                // Left bound is directly after the node before candidate
+                left = candidate->prev->start + candidate->prev->length
                 
                 // Right bound is the beginning of next allocated node
                 right = p->start; 
                 
                 if (right - left >= num_units) {
                 // Sufficient space is found!
-                    // Populate canidate's node fields with proper values
-                    canidate->pid = process_id; 
-                    canidate->start = left;
-                    canidate->length = num_units;
-                    memNext = canidate; // Next search starts after this node
+                    // Populate candidate's node fields with proper values
+                    candidate->pid = process_id; 
+                    candidate->start = left;
+                    candidate->length = num_units;
+                    memNext = candidate; // Next search starts after this node
                     break; // Exit the search, we got what we came for!
                 }
                 
@@ -281,7 +282,54 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break; // End of next-fit policy
             
-        case BEST: //a case label should end with a colon, not a semicolon.
+        case BEST:            
+            node *bestFit; // Used to save place of best fit block space
+            
+            // Starter value to compare against, any offset will be smaller
+            unsigned int minOffset = blockCount; 
+            
+            p = memRoot; // Start search at beginning of DLL
+            
+            do {
+                
+                while (p->next && p->next->pid > -1) {
+                // Find next unallocated node
+                    p = p->next;
+                    traversalCount++;
+                }
+                left = p->start + p->length;
+                
+                if (p->next) {
+                    
+                    candidate = p->next;
+                                
+                    while (p->next && p->next->pid < 0) {
+                    // Find next allocated node
+                        p = p->next;
+                    }
+                    right = p->start;
+                    
+                    offset = right - left;
+                    
+                    if (offset = num_units) {
+                    // Sufficient space is found!
+                        // Populate candidate's node fields with proper values
+                        candidate->pid = process_id; 
+                        candidate->start = left;
+                        candidate->length = num_units;
+                        break;
+                    } 
+                    
+                    if (offset > num_units && offset < minOffset) {
+                        bestFit = candidate;
+                        minOffset = offset;
+                    }
+                } else {
+                    traversalCount = -1;
+                    break;
+                }
+                
+            } while (p->next);
             
             break;
             
@@ -297,6 +345,7 @@ int memManager::allocMem(int process_id, int num_units) {
 //******************************************************************************
 
 // Author: Josiah
+
 unsigned int memManager::countHoles()
 { // added memManager so that it can access the private members of the class
 	int count = 0;
@@ -369,16 +418,21 @@ void memManager::checkLL() {}
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
 
+//******************************************************************************
 
-	void memManager::printIt()
-	{
-		node *p = memRoot;
-		while (p != NULL)
-		{
-			std::cout << "PID: " << p->pid << ", Start: " << p->start << ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << p->next << std::endl;
-			p = p->next;
-		}
-	}
+// Author: Simeon K - 9/18
+
+void memManager::printIt()
+{
+    node *p = memRoot;
+    while (p != NULL)
+    {
+        std::cout << "PID: " << p->pid << ", Start: " << p->start << 
+        ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << 
+        p->next << std::endl;
+        p = p->next;
+    }
+}
 
 
 
