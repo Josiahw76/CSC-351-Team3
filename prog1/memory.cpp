@@ -372,7 +372,7 @@ int memManager::allocMem(int process_id, int num_units) {
 				do {
 					lp = lp->next;
 					traversalCount++;
-				} while (lp != NULL && lp->pid < 0)
+				} while (lp != NULL && lp->pid < 0);
 				// Now, lp is either not real or has found an allocated node
 				if (lp->pid > 0) {
 					offset = lp->start - left;
@@ -432,15 +432,12 @@ unsigned int memManager::countHoles() {
 		}
 		p = p->next;
 	}
-	// Simeon K
-	if (blockCount > start1)
-		{
-			offset = blockCount - start1;
-
-			if (offset == 1 || offset == 2)
-			{
-				count++;
-			}
+	if (128 - start1 < 3) {
+		// If there's a space between the true end of the block segments and
+		// the last allocated blocks, it's a fragment.
+		// Checking for zero is tautologically unnecessary. If it's zero,
+		// we have far bigger problems.
+		count++;	
 	}
 	return count;
 }
