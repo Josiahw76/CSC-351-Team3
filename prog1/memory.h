@@ -23,6 +23,7 @@ const unsigned int WORST = 4;
 class memManager {
 	private:
         node *memRoot; // Points to the first node in DLL structure
+        node *memNext; // Points to the node for which next-fit begins search
         
 		unsigned int nodeCount; // Node count of the number of nodes
 
