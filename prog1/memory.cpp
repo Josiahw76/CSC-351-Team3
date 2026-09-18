@@ -350,7 +350,7 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break; // End of best fit logic
             
-        case WORST:
+		case WORST:
 			// Josiah
        		// Finds the largest hole that fits our memory unit and
 			// greedily allocates it
@@ -359,6 +359,7 @@ int memManager::allocMem(int process_id, int num_units) {
 			p = lp = memRoot; // start both at root
 
 			int greatest_size = 0;
+			int offset;
 			left = p->start + p->length; // init left side
 
 			// Move ahead until a gap is discovered
@@ -394,10 +395,6 @@ int memManager::allocMem(int process_id, int num_units) {
 				// and start the search again
 				p = lp;
 				left = p->start + p->length;
-			}
-
-			while (p) { }
-				
 			}
             break;
     }
