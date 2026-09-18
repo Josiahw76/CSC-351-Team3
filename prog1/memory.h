@@ -2,10 +2,11 @@
 
 #ifndef __MEMORY_H
 #define __MEMORY_H
+#include <cstddef>
 
 // forward declarations
 class node; // 
-class list;/ /  
+class list;//  
 class memManager; //
 
 // Use these for simple math
@@ -26,6 +27,8 @@ class memManager {
         node *memNext; // Points to the node for which next-fit begins search
         
 		unsigned int nodeCount; // Node count of the number of nodes
+
+		unsigned int blockCount;
 
         // 1-4 for fit policies first, next, best, and worst respectively
         unsigned int policy; 
@@ -71,8 +74,6 @@ class node {
 		unsigned int length; // number of blocks represented by this node
 		node *prev; // Left pointer, if first it's null
 		node *next; // Right pointer, if last it's null
-		unsigned int start, length; // tracks memory blocks
-		node *prev, *next; // DLL left/right pointers
 	
 	public:
 		node(int pid, unsigned int start, unsigned int length,

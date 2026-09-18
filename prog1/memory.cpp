@@ -5,7 +5,7 @@
 //				Node Function				      //
 //******************************************************************************
 
-node::node(int pid, unsigned int start, unsigned int length, node *prev = NULL, node *next = NULL) {
+node::node(int pid, unsigned int start, unsigned int length, node *prev, node *next) {
 	this->pid = pid;
 	this->start = start;
 	this->length = length;
@@ -98,6 +98,8 @@ unsigned int list::getCount() {
 
 memManager::memManager(unsigned int policy, unsigned int blockCount) {
     this->policy = policy; // Indicates which fit-policy will be used.
+
+	this->blockCount = blockCount; //Indicates how many blocks of memory are available for allocation.
     
     // Enough nodes to fill storage with 3-block units.
     nodeCount = blockCount/3; 
@@ -129,7 +131,7 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
 memManager::~memManager() {
 	// can't really do a recursive deletion here, so
 	// conditional loop it is.
-	node *p = first;
+	node *p = memRoot; //first doesnt exist, so we have to start at the root -SK
 	while (p->next != NULL) {
 		p = p->next;
 		delete p->prev;
@@ -274,11 +276,11 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break; // End of next-fit policy
             
-        case BEST;
+        case BEST: //a case label should end with a colon, not a semicolon.
             
             break;
             
-        case WORST;
+        case WORST: //a case label should end with a colon, not a semicolon.
         
             break;
     }
@@ -290,7 +292,7 @@ int memManager::allocMem(int process_id, int num_units) {
 //******************************************************************************
 
 // Author: Josiah
-unsigned int countHoles() {
+unsigned int memManager::countHoles() { //added memManager so that it can access the private members of the class
 	int count = 0;
 	int start1 = 0;
 	int offset;
@@ -338,15 +340,16 @@ void memManager::deallocMem(int process_id) {
 		PIDlist->deleteAt(index);
 		rc = true;
 	}
-	return rc;
+	return;
 }
 
 //******************************************************************************
 
-void memManager::checkLL(int process_id, int num_units) {}
+void memManager::checkLL() {}
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
 
 
-void printIt(const) {}
+void memManager::printIt() {}
+
 
