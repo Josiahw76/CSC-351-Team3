@@ -532,4 +532,13 @@ void memManager::printIt()
     }
 }
 
+//************************************************************************************
 
+// Author: Kam E - 9/18
+
+unsigned int getCount()
+{
+	bool rc = (index < getCount);
+
+     return rc;
+}
