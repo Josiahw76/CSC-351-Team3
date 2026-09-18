@@ -295,16 +295,54 @@ int memManager::allocMem(int process_id, int num_units) {
 			// Josiah
        		// Finds the largest hole that fits our memory unit and
 			// greedily allocates it
-			p = memRoot;
+
+			node *lp; // lookahead
+			p = lp = memRoot; // start both at root
+
+			int greatest_size = 0;
+			left = p->start + p->length; // init left side
+
+			// Move ahead until a gap is discovered
+			// gap is start2 - (start1 + length1)
+			//
+			// have to move forward pointer until a real node is found
+			// once we find a measurable gap, record what we find
+
+			while (true) {
+				do {
+					lp = lp->next;
+					traversalCount++;
+				} while (lp != NULL && lp->pid < 0)
+				// Now, lp is either not real or has found an allocated node
+				if (lp->pid > 0) {
+					offset = lp->start - left;
+					if (offset > greatest_size) {
+						greatest_size = offset;
+						candidate = p;
+					}
+				} else {
+					// Else means that lp was null, so we have to break
+					offset = 128 - left; // Check how far we are from the 
+										 // true end of the blocks
+					// Run the same size check logic
+					if (offset > greatest_size) {
+						greatest_size = offset;
+						candidate = p;
+					}
+					break;
+				}
+				// Set our new left side to the current node
+				// and start the search again
+				p = lp;
+				left = p->start + p->length;
+			}
 
 			while (p) {
 				
-
+			}
             break;
     }
-    
     return traversalCount;
-        
 }
 
 //******************************************************************************
@@ -375,12 +413,10 @@ void memManager::checkLL() {}
 //while searching the list for a new hole.
 
 
-	void memManager::printIt()
-	{
-		node *p = memRoot;
-		while (p != NULL)
-		{
-			std::cout << "PID: " << p->pid << ", Start: " << p->start << ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << p->next << std::endl;
+void memManager::printIt() {
+	node *p = memRoot;
+	while (p != NULL) {
+		std::cout << "PID: " << p->pid << ", Start: " << p->start << ", Length: " << p->length << ", Prev: " << p->prev << ", Next: " << p->next << std::endl;
 			p = p->next;
 		}
 	}
