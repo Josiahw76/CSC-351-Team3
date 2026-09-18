@@ -128,6 +128,7 @@ int main(int argc, char *argv[]) {
 				Sims[i]->deallocMem(unluckyPID);	
 
 			}
+			Sims[i]->checkLL();
 			Sims[i]->countHoles();
 		}
 	// }
