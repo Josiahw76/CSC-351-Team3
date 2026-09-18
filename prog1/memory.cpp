@@ -168,7 +168,7 @@ int memManager::allocMem(int process_id, int num_units) {
     switch (policy) {
     // Allocates according to specified fit-policy
     
-        case FIRST:
+        case FIRST: // Author: Dylan P - 9/18
             p = memRoot; // Start search for space at beginning of DLL 
             
             do {
@@ -232,7 +232,7 @@ int memManager::allocMem(int process_id, int num_units) {
      
             break; // End of first fit policy logic
         
-        case NEXT:
+        case NEXT: // Author: Dylan P - 9/18
             p = memNext; // Begin search at the saved next-fit position
             
             do {
@@ -288,7 +288,7 @@ int memManager::allocMem(int process_id, int num_units) {
             
             break; // End of next-fit policy
             
-        case BEST:            
+        case BEST: // Author: Dylan P - 9/18        
             node *bestFit; // Used to save place of best fit block space
             
             // Starter value to compare against, any offset will be smaller
@@ -297,47 +297,59 @@ int memManager::allocMem(int process_id, int num_units) {
             p = memRoot; // Start search at beginning of DLL
             
             do {
-                
+            // Loops over entire DLL to find the best fit
+            
                 while (p->next && p->next->pid > -1) {
                 // Find next unallocated node
                     p = p->next;
-                    traversalCount++;
+                    traversalCount++; // Account for the traversed node
                 }
-                left = p->start + p->length;
+                
+                // Set left bound to the end of blocks last used node allocated
+                left = p->start + p->length; 
                 
                 if (p->next) {
+                // If we aren't at end of list
                     
-                    candidate = p->next;
+                    candidate = p->next; // We might be able to insert here
                                 
                     while (p->next && p->next->pid < 0) {
                     // Find next allocated node
                         p = p->next;
                     }
-                    right = p->start;
                     
+                    // Right bound is the start of next allocated node
+                    right = p->start; 
+                    
+                    // The offset represents how many blocks are available
                     offset = right - left;
                     
                     if (offset = num_units) {
-                    // Sufficient space is found!
+                    // The tightest space is found
                         // Populate candidate's node fields with proper values
                         candidate->pid = process_id; 
                         candidate->start = left;
                         candidate->length = num_units;
-                        break;
+                        
+                        // No need to continue searching for a more perfect fit
+                        break; 
                     } 
                     
                     if (offset > num_units && offset < minOffset) {
-                        bestFit = candidate;
-                        minOffset = offset;
+                    // If the offset can fit the requested blocks, and is a 
+                    // tighter fit than our last candidate, update bestFit
+                        bestFit = candidate; // Our current best option
+                        minOffset = offset; // Tighten standard
                     }
                 } else {
-                    traversalCount = -1;
+                // We looked through the whole list and didn't find any space
+                    traversalCount = -1; // Failure code :(
                     break;
                 }
                 
-            } while (p->next);
+            } while (p->next); // No need to continue, nothing left to search
             
-            break;
+            break; // End of best fit logic
             
         case WORST:
 			// Josiah
