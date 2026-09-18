@@ -120,7 +120,6 @@ memManager::memManager(unsigned int policy, unsigned int blockCount) {
     memNext = memRoot; // Initially, the next fit pointer starts at first block.
     
     node *p = memRoot; // Initialize prev pointer for loop.
-    node *n; // Declares next pointer for.
     
     for (unsigned int i = 1; i < nodeCount; i++) {
     // Iteratively creates the remaining number of needed nodes.
@@ -162,8 +161,8 @@ int memManager::allocMem(int process_id, int num_units) {
     // Node at which blocks might be allocated if subsequent space is sufficient
     node *candidate; 
     
-    unsigned int left; // Index of first free block
-    unsigned int right; // Index of last free block
+    int left; // Index of first free block
+    int right; // Index of last free block
     
     switch (policy) {
     // Allocates according to specified fit-policy
@@ -292,7 +291,7 @@ int memManager::allocMem(int process_id, int num_units) {
             node *bestFit; // Used to save place of best fit block space
             
             // Starter value to compare against, any offset will be smaller
-            unsigned int minOffset = blockCount; 
+            int minOffset = blockCount; 
             
             p = memRoot; // Start search at beginning of DLL
             
@@ -322,9 +321,9 @@ int memManager::allocMem(int process_id, int num_units) {
                     right = p->start; 
                     
                     // The offset represents how many blocks are available
-                    offset = right - left;
+                    int offset = right - left;
                     
-                    if (offset = num_units) {
+                    if (offset == num_units) {
                     // The tightest space is found
                         // Populate candidate's node fields with proper values
                         candidate->pid = process_id; 
@@ -397,7 +396,7 @@ int memManager::allocMem(int process_id, int num_units) {
 				left = p->start + p->length;
 			}
 
-			while (p) {
+			while (p) { }
 				
 			}
             break;
@@ -466,9 +465,35 @@ void memManager::deallocMem(int process_id) {
 
 //******************************************************************************
 
-void memManager::checkLL() {}
 // Kam - 9/17: This outputs the first hole that is big enough,
 //while searching the list for a new hole.
+void memManager::checkLL() { 
+	node *p = memRoot; // Start at the root 
+	node *prev = NULL; // Initialize prev pointer to NULL
+	unsigned int visited = 0; // Count of nodes visited
+	while (p != NULL) { // While we haven't reached the end
+
+		if (visited >= nodeCount) {
+			std::cerr << "Error: DLL visited length exceeds expected node count of " << nodeCount << std::endl; // If we have visited more nodes than expected, print error message and exit
+			exit(EXIT_FAILURE); // Exit the program with failure status
+		}
+
+		if (p->prev != prev) { // Check if the prev pointer of the current node is correct
+			std::cerr << "Error: Improper linkage at node " << visited << ". Expected" << nodeCount << " nodes." << std::endl; // If not, print error message and exit
+			exit(EXIT_FAILURE); //
+		}
+
+		prev = p; // Update prev pointer to current node
+		p = p->next; // Move to the next node
+		visited++; // Increment count of nodes visited
+	}
+
+	if (visited != nodeCount) { // Check if the number of nodes visited is equal to the expected node count
+		std::cerr << "Error: DLL length mismatch. Expected " << nodeCount << ", but visited " << visited << std::endl; // If not, print error message and exit
+		exit(EXIT_FAILURE); // Exit the program with failure status
+
+	}
+}
 
 //******************************************************************************
 
