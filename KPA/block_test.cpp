@@ -19,6 +19,22 @@ int main()
     assert(byte == 5);
     std::cout << "Bit-setting test passed.\n";
 
+    byte = byte & ~mask;
+    assert(byte == 1);
+    std::cout << "Bit-clearing test passed.\n";
+
+    unsigned char searchByte = 5;
+    unsigned int freePosition = 0;
+
+    while (freePosition < 8 &&
+            ((searchByte >> freePosition) & 1) == 1)
+    {
+        freePosition++;
+    }
+
+    assert(freePosition == 1);
+    std::cout << "Free-bit search test passed.\n";
+
     Block larger(17);
     assert(larger.getBitmapSize() == 3);
     std::cout << "Constructor and bitmap-size tests passed.\n";

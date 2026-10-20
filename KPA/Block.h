@@ -17,6 +17,16 @@ class Block {
 
             return bytes;
         }
+        unsigned char setBit(unsigned char byte, unsigned int bitPosition)
+        {
+            unsigned char mask = 1 << bitPosition;
+            return byte | mask;
+        }
+        unsigned char clearBit(unsigned char byte, unsigned int bitPosition)
+        {
+            unsigned char mask = 1 << bitPosition;
+            return byte & ~mask;
+        }
     public:
         Block(unsigned int count)
         {
