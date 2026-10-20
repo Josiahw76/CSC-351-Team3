@@ -4,6 +4,7 @@ class Block {
     private:
         unsigned int blockCount = 0;
         unsigned int bitmapSize = 0;
+        unsigned char *dataBlockBitMap;
         unsigned int bitmapBytes(unsigned int blockCount)
         {
             unsigned int bytes = blockCount / 8;
@@ -21,6 +22,13 @@ class Block {
         {
             blockCount = count;
             bitmapSize = bitmapBytes(count);
+
+            dataBlockBitMap = new unsigned char[bitmapSize];
+        
+            for (unsigned int i = 0; i < bitmapSize; i++)
+            {
+                dataBlockBitMap[i] = 0;
+            }
         }
 
         unsigned int getBlockCount() const
@@ -29,8 +37,15 @@ class Block {
         }
 
         unsigned int getBitmapSize() const
+
         {
+            
             return bitmapSize;
+        }
+
+        ~Block()
+        {
+            delete[] dataBlockBitMap;
         }
 
 
