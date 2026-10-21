@@ -27,6 +27,37 @@ class Block {
             unsigned char mask = 1 << bitPosition;
             return byte & ~mask;
         }
+
+        unsigned int findFreeBlock()
+        {
+            for (unsigned int byteIndex = 0;
+                byteIndex < bitmapSize;
+                byteIndex++)
+            {
+                if (dataBlockBitMap[byteIndex] !=255)
+                {
+                    unsigned int freePosition = 0;
+
+                    while (freePosition < 8 &&
+                        ((dataBlockBitMap[byteIndex] >> freePosition) & 1) == 1)
+                    {
+                        freePosition++;
+                    }
+
+                    unsigned int blockIndex = byteIndex * 8 + freePosition;
+
+                    if (blockIndex < blockCount)
+                    {
+                        return blockIndex;
+                    }
+                }
+            }
+
+
+            return blockCount;
+
+        }
+
     public:
         Block(unsigned int count)
         {
