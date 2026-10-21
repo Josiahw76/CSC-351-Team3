@@ -1,51 +1,14 @@
 // Author: Josiah Winiecki
 
-#include <stdio.h>
-#include <iostream>
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
+#include "shell.h"
 
 #define DEFAULT_PORT 8080
 
 using namespace std;
 
-int clientSocket;
-sockaddr_in serverAddress{};
-
-
-// Setup function to build the 
-int init(const char *IP) {
-	int rc;
-	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-
-	serverAddress.sin_family = AF_INET;
-	serverAddress.sin_port = htons(8080);
-	serverAddress.sin_addr.s_addr = INADDR_ANY;
-
-	// Optionally, set IP address
-	if (strlen(IP) > 0) {
-		inet_pton(AF_INET, IP, &serverAddress.sin_addr);
-	}
-
-	if (connect(clientSocket, (struct sockaddr*)&serverAddress, 
-		sizeof(serverAddress)) < 0) { 
-		perror("Connection failed");
-		rc = 0;
-	} else {
-		printf("Connection ");
-		if (strlen(IP) > 1) {
-			printf("to %s ",IP);
-		}
-		printf("successful.\n");
-		rc = 1;
-	}
-	return rc;
-}
-
-
 int main(int argc, char *argv[]) {
+
+	// INIT PHASE
 
 	// Run init with a provided IP value if one was given
 	if (!init(argv[1] ? argv[1] : "")) {
@@ -53,24 +16,97 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
+	// OPERATIONS PHASE
+
+	char input[128];
+	char retString[4096];
+	char command[8];
+	COMMAND opcode;
+	unsigned int i = 0;
+	int bytesReceived;
+
 	while (true) {
-		char buffer[128];
 
 		// Read input until a newline
-		cin.getline(buffer, sizeof(buffer));
+		cin.getline(input, sizeof(input));
 
-		// Transmit the data to the receiver
-     		send(clientSocket, buffer, strlen(buffer), 0);
+		// Parse the command.
+		while ((input[i] != '\0' && input[i] != ' ') {
+			command[i] = input[i];
+			i++;
+			// Make sure the command isn't out of bounds
+			// for the buffer.
+			if (i > 7) {
+				break;	
 
-		/* rc = recv(clientSocket, buffer, sizeof(buffer), 0);
-		if (rc > 0) {
-			cout << "> " << buffer << endl;
-		} */
-		memset(buffer, ' ', sizeof(buffer));
+				// Rather than take measures here,
+				// opcode of UNKNOWN will catch the error.
+			}
+		}
 
+		opcode = strToCmd(command);
+		// Enter the appropriate function
+		switch (opcode) {
+			case LS:
+			ls();
+			break;
+
+			case MKDIR:
+			mkdir();
+			break;
+
+			case PWD:
+			pwd();
+			break;
+
+			case STAT:
+			stat();
+			break;
+
+			case TOUCH:
+			touch();
+			break;
+
+			case LCPIN:
+			lcp();
+			break;
+
+			case LCPOUT:
+			Lcp();
+			break;
+
+			case SHUTDOWN:
+			shutdown();
+			break;
+
+			case EXIT:
+			exit();
+			break;
+
+			case "":
+			break;
+
+			default:
+			printf("Error: Command not recognized.\n");
+		}
+		// Prep read variables for next use
+		memset(command, ' ', sizeof(command));
+		i = 0;
+
+		// Receive results of command from FS
+		bytesReceived = recv(clientSocket, retString, 
+					sizeof(retString), 0);
+		if (bytesReceived > 0) {
+			// Append message with null terminator to avoid
+			// reading into bad values.
+			retString[bytesReceived] = '\0';
+		}
+		// Return string processing
+		// ...
 	}
 
-	close(clientSocket);
+	// SHUTDOWN PHASE
 
+	close(clientSocket);
 	return 1;
 }
