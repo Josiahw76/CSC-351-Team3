@@ -22,7 +22,6 @@ int main()
     byte = byte & ~mask;
     assert(byte == 1);
     std::cout << "Bit-clearing test passed.\n";
-
     unsigned char searchByte = 5;
     unsigned int freePosition = 0;
 
@@ -34,6 +33,13 @@ int main()
 
     assert(freePosition == 1);
     std::cout << "Free-bit search test passed.\n";
+
+    unsigned int byteIndex = 1;
+    unsigned int blockIndex = byteIndex * 8 + freePosition;
+
+    assert(blockIndex == 9);
+    assert(blockIndex < first.getBlockCount());
+    std::cout <<"Block-index calculation test passed.\n";
 
     Block larger(17);
     assert(larger.getBitmapSize() == 3);
