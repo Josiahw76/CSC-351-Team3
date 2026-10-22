@@ -2,6 +2,7 @@
 
 #include "shell.h"
 
+/*
 int initSock(const char *IP) {
 	int rc;
 	clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -29,4 +30,42 @@ int initSock(const char *IP) {
 	}
 	return rc;
 }
+*/
 
+char * issueCommand(const char *operation, bool givePWD, char *args) {
+
+
+}
+/*		temporarily comment these out to avoid compiler messages
+void ls() {
+	// Invoke issueCommand with ls and give pwd to the FS
+	char *rc = issueCommand("ls", true);
+
+	// Print the formatted contents of rc to the terminal window
+	// ...
+}
+
+cd() {
+
+}
+
+mkdir() {
+
+}
+
+void pwd() {
+	printf("%s", pwdString);
+}
+
+stat() {}
+
+touch() {}
+
+lcp() {}
+
+Lcp() {}
+
+shutdown() {}
+
+exit() {}
+*/

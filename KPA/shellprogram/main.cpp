@@ -1,8 +1,17 @@
 // Author: Josiah Winiecki
 
 #include "shell.h"
+#include "kpaTCP.h"
+#include <string>
+#include <stdio.h>
+#include <iostream>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
 
 #define DEFAULT_PORT 8080
+#define LOCALHOST "127.0.0.1"
 
 using namespace std;
 
@@ -10,12 +19,24 @@ int main(int argc, char *argv[]) {
 
 	// INIT PHASE
 
+	string activeIP = LOCALHOST;
+	int activePort = DEFAULT_PORT;
+
+	// Determine whether to use default or given values
+	
+
+	kpaTCP *tcpSocket = new kpaTCP(activeIP, activePort, false);
+
+
+	/*
 	// Run init with a provided IP value if one was given
-	if (!init(argv[1] ? argv[1] : "")) {
+	if (!initSock(argv[1] ? argv[1] : "")) {
 		perror("Init failed");
 		exit(1);
 	}
-	
+	*/
+
+
 	// OPERATIONS PHASE
 
 	char input[128];
@@ -29,9 +50,9 @@ int main(int argc, char *argv[]) {
 
 		// Read input until a newline
 		cin.getline(input, sizeof(input));
-
+/*
 		// Parse the command.
-		while ((input[i] != '\0' && input[i] != ' ') {
+		while (input[i] != '\0' && input[i] != ' ') {
 			command[i] = input[i];
 			i++;
 			// Make sure the command isn't out of bounds
@@ -49,6 +70,10 @@ int main(int argc, char *argv[]) {
 		switch (opcode) {
 			case LS:
 			ls();
+			break;
+
+			case CD:
+			cd();
 			break;
 
 			case MKDIR:
@@ -88,14 +113,14 @@ int main(int argc, char *argv[]) {
 
 			default:
 			printf("Error: Command not recognized.\n");
-		}
+		} 
 		// Prep read variables for next use
 		memset(command, ' ', sizeof(command));
 		i = 0;
-
+*/
 		// Receive results of command from FS
-		bytesReceived = recv(clientSocket, retString, 
-					sizeof(retString), 0);
+		bytesReceived = tcpSocket->commsWrite(retString, 
+					sizeof(retString));
 		if (bytesReceived > 0) {
 			// Append message with null terminator to avoid
 			// reading into bad values.
@@ -107,6 +132,6 @@ int main(int argc, char *argv[]) {
 
 	// SHUTDOWN PHASE
 
-	close(clientSocket);
+	delete tcpSocket;
 	return 1;
 }

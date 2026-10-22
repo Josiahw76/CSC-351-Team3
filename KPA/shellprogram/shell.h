@@ -8,8 +8,14 @@
 #include <sys/socket.h>
 #include <cstring>
 
+//******************************************************************************
+// 				DEFINITIONS
+//******************************************************************************
+
+// Operation codes for switch case statement in the main.
 enum COMMAND {
 	LS,
+	CD,
 	MKDIR,
 	PWD,
 	STAT,
@@ -21,25 +27,36 @@ enum COMMAND {
 	UNKNOWN
 };
 
+// The present working directory of the Shell
+// char *pwdString;
+
+//******************************************************************************
+// 				FUNCTIONS
+//******************************************************************************
+
+// Changes a string containing an operation code to the corresponding enum
+// code.
 inline COMMAND strToCmd(char *str) {
 	COMMAND rc;
 	if (strcmp(str, "ls")) {
 		rc = LS;
-	} else if (strcmp(str, "mkdir") {
+	} else if (strcmp(str, "cd")) {
+		rc = CD;
+	} else if (strcmp(str, "mkdir")) {
 		rc = MKDIR;
-	} else if (strcmp(str, "pwd") {
+	} else if (strcmp(str, "pwd")) {
 		rc = PWD;
-	} else if (strcmp(str, "stat") {
+	} else if (strcmp(str, "stat")) {
 		rc = STAT;
-	} else if (strcmp(str, "touch") {
+	} else if (strcmp(str, "touch")) {
 		rc = TOUCH;
-	} else if (strcmp(str, "lcp") {
+	} else if (strcmp(str, "lcp")) {
 		rc = LCPIN;
-	} else if (strcmp(str, "Lcp") {
+	} else if (strcmp(str, "Lcp")) {
 		rc = LCPOUT;
-	} else if (strcmp(str, "shutdown") {
+	} else if (strcmp(str, "shutdown")) {
 		rc = SHUTDOWN;
-	} else if (strcmp(str, "exit") {
+	} else if (strcmp(str, "exit")) {
 		rc = EXIT;
 	} else {
 		rc = UNKNOWN;
@@ -47,20 +64,8 @@ inline COMMAND strToCmd(char *str) {
 	return rc;
 }
 
-// 
-// send(clientSocket, buffer, strlen(buffer), 0);
-
-
-// The present working directory of the Shell
-char *pwdString;
-
-// socket id/adresses for use by issueCommand and init
-int clientSocket;
-sockaddr_in serverAddress{};
-
-
 // Initializes the client socket used to connect to the File System.
-initSock(const char *IP);
+// int initSock(const char *IP);
 
 // Helper function that handles communications between the shell and FS.
 //
@@ -69,17 +74,21 @@ initSock(const char *IP);
 // some commands don't have args so the parameter is optional
 char * issueCommand(const char *operation, bool givePWD, char *args = NULL);
 
+/*	temporarily comment these out for compiler messages
+
 // Lists the contents of the current working directory within the FS
 //
 // Makes a request for the contents of the directory that pwdString points to.
 // The contents are placed on the output stream
 void ls();
 
+cd();
+
 // Creates a new directory within the current working directory in the FS
 mkdir();
 
 // Gives the current working directory
-pwd();
+void pwd();
 
 // Returns metadata about a given file.
 stat();
@@ -88,9 +97,11 @@ stat();
 touch();
 
 // Copies a file from the host OS into the FS
+// Also known as LCPIN
 lcp();
 
 // Copies a file out of the FS into the host OS
+// Also known as LCPOUT
 Lcp();
 
 // Terminates the File System process and closes the Shell.
@@ -98,3 +109,5 @@ shutdown();
 
 // Detaches from the FS and terminates the Shell process
 exit();
+
+*/
