@@ -58,6 +58,23 @@ class Block {
 
         }
 
+        int allocate()
+        {
+            int index = findFree();
+
+            if (index == -1)
+            {
+                return -1;
+            }
+
+            unsigned int byteIndex = index / 8;
+            unsigned int bitPosition = index % 8;
+
+            bits[byteIndex] = setBit(bits[byteIndex], bitPosition);
+
+            return index;
+        }
+
     public:
         Block(unsigned int count)
         {
