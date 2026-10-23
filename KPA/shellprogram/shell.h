@@ -7,6 +7,10 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <cstring>
+#include <string>
+#include "kpaTCP.h"
+
+using namespace std;
 
 //******************************************************************************
 // 				DEFINITIONS
@@ -27,8 +31,10 @@ enum COMMAND {
 	UNKNOWN
 };
 
-// The present working directory of the Shell
-// char *pwdString;
+// Present working directory as string
+string pwdString;
+
+extern string args;
 
 //******************************************************************************
 // 				FUNCTIONS
@@ -64,17 +70,25 @@ inline COMMAND strToCmd(char *str) {
 	return rc;
 }
 
-// Initializes the client socket used to connect to the File System.
-// int initSock(const char *IP);
+// Used to maintain consistent format with args.
+// Does not fix issues inside the string itself.
+inline void trimLR(string &str) {
+	while (str[0] == ' ' && str.length() > 0) {
+		str.erase(0, 1);
+	}
+	while (str.back() == ' ' && str.length() > 0) {
+		str.erase(str.length() - 1, 1);
+	}
+}
 
 // Helper function that handles communications between the shell and FS.
 //
 // operation is what to do, givePWD = true will provide pwdString to FS,
 // and args are optional arguments that were given to the shell by the user.
-// some commands don't have args so the parameter is optional
-char * issueCommand(const char *operation, bool givePWD, char *args = NULL);
-
-/*	temporarily comment these out for compiler messages
+// some commands don't have args so the parameter is optional.
+//
+// Handles message reception as well.
+char *issueCommand(const char *operation, bool givePWD, bool useArgs = true);
 
 // Lists the contents of the current working directory within the FS
 //
@@ -82,32 +96,33 @@ char * issueCommand(const char *operation, bool givePWD, char *args = NULL);
 // The contents are placed on the output stream
 void ls();
 
-cd();
+// Changes the present working directory.
+//
+// Provides to the FS pwdString and args.
+void cd();
 
 // Creates a new directory within the current working directory in the FS
-mkdir();
+void mkdir();
 
 // Gives the current working directory
+// Does not communicate with FS: just prints pwdString
 void pwd();
 
 // Returns metadata about a given file.
-stat();
+void stat();
 
-// Creates a file using the given filename
-touch();
+// Creates a file using the given filename if it does not exist.
+// Otherwise updates modified and access times.
+void touch();
 
 // Copies a file from the host OS into the FS
 // Also known as LCPIN
-lcp();
+void lcp();
 
 // Copies a file out of the FS into the host OS
 // Also known as LCPOUT
-Lcp();
+void Lcp();
 
 // Terminates the File System process and closes the Shell.
-shutdown();
+void shutdown();
 
-// Detaches from the FS and terminates the Shell process
-exit();
-
-*/

@@ -10,8 +10,13 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+
+// Global Variables
 #define DEFAULT_PORT 8080
 #define LOCALHOST "127.0.0.1"
+kpaTCP *tcpSocket;
+string args = ""; // args is global as nearly every command call uses it.
+
 
 using namespace std;
 
@@ -24,33 +29,27 @@ int main(int argc, char *argv[]) {
 
 	// Determine whether to use default or given values
 	
-
-	kpaTCP *tcpSocket = new kpaTCP(activeIP, activePort, false);
-
-
-	/*
-	// Run init with a provided IP value if one was given
-	if (!initSock(argv[1] ? argv[1] : "")) {
-		perror("Init failed");
-		exit(1);
-	}
-	*/
-
+	tcpSocket = new kpaTCP(activeIP, activePort, false);
 
 	// OPERATIONS PHASE
 
-	char input[128];
+	string input;
 	char retString[4096];
 	char command[8];
 	COMMAND opcode;
 	unsigned int i = 0;
 	int bytesReceived;
+	bool exitFlag = false;
 
-	while (true) {
+	while (!exitFlag) {
+		// Clean variables
+		memset(command, ' ', sizeof(command));
+		i = 0;
+		args.clear();
 
 		// Read input until a newline
-		cin.getline(input, sizeof(input));
-/*
+		getline(cin, input);
+
 		// Parse the command.
 		while (input[i] != '\0' && input[i] != ' ') {
 			command[i] = input[i];
@@ -64,8 +63,21 @@ int main(int argc, char *argv[]) {
 				// opcode of UNKNOWN will catch the error.
 			}
 		}
+		// Null terminator to prevent reading out of bounds
+		command[i] = '\0';
 
 		opcode = strToCmd(command);
+		if (opcode != UNKNOWN) {
+			// Get everything after the command
+			args = input.substr(strlen(command), input.size());
+
+			// Trim whitespace from the args
+			trimLR(args);
+		} else {
+			printf("Command \"%s\" not recognized\n",command);
+			continue;
+		}
+		
 		// Enter the appropriate function
 		switch (opcode) {
 			case LS:
@@ -100,34 +112,30 @@ int main(int argc, char *argv[]) {
 			Lcp();
 			break;
 
+			// Shutdown flows down into exit.
 			case SHUTDOWN:
 			shutdown();
-			break;
 
 			case EXIT:
-			exit();
-			break;
-
-			case "":
+			exitFlag = true;
 			break;
 
 			default:
-			printf("Error: Command not recognized.\n");
+			printf("Error: Invalid input\n");
 		} 
-		// Prep read variables for next use
-		memset(command, ' ', sizeof(command));
-		i = 0;
-*/
+
+		/* Debug lines for connection testing
+		tcpSocket->commsWrite(input, sizeof(input));
+
 		// Receive results of command from FS
-		bytesReceived = tcpSocket->commsWrite(retString, 
+		bytesReceived = tcpSocket->commsRead(retString, 
 					sizeof(retString));
 		if (bytesReceived > 0) {
 			// Append message with null terminator to avoid
 			// reading into bad values.
 			retString[bytesReceived] = '\0';
 		}
-		// Return string processing
-		// ...
+		*/
 	}
 
 	// SHUTDOWN PHASE
