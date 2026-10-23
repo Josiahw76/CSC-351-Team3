@@ -19,24 +19,36 @@
 //******************************************************************************
 
 class blocks {
+    private:
         // Item count and size used to reconstruct data from backing store.
         unsigned int itemCount; // Length of bitmap and block array.
         unsigned int itemSize; // Used for allignment within the block array.
         
+        // Number of bytes needed for bitmap, plus one extra if leftovers exist.
+        unsigned int bitmapByteCount = (itemCount/8) + ((itemCount%8) > 0);
+        
         // Tracks free and used items. Traverse the array until a byte < 255 is
         // found, then use bitwise operations to find the free bit.
-        unsigned char *bitmap; 
-        
-        // Number of bytes needed for bitmap, plus one extra if leftovers exist.
-        unsigned int bitmapByteCount = (itemCount/8) + (itemCount%8) > 0;
+        char *bitmap; 
         
         // Used to store the raw bytes of each item. Cast at runtime to align
         // with the size of blocks.
-        unsigned char *pool;
+        char *pool;
+        
+    public:
+        // Allocates sufficient memory for itemCount in bitmap and byte array.
+        blocks();
+        
+        // Deallocates dynamic memory to prevent leak.
+        ~blocks();
+        
+        char* getPool() const;
         
         // Sets or clears specified bit in bitmap to mark as free or used.
         unsigned int BMsetBit(unsigned int bitID);
         unsigned int BMclearBit(unsigned int bitID);
+        
+        
 };
 
 //******************************************************************************

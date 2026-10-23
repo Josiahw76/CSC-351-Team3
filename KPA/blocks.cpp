@@ -12,6 +12,29 @@
 //******************************************************************************
 
 // Author: Dylan P
+blocks::blocks(unsigned int itemCount, itemSize) {
+    this->itemCount = itemCount;
+    this->itemSize = itemSize;
+    
+    bitmap = new char[bitmapByteCount]; // Allocates bytes for 1 bit per item.
+    pool = new char[itemCount * itemSize]; // Allocates bytes to store items.
+}
+
+//******************************************************************************
+
+blocks::~blocks() {
+}
+
+//******************************************************************************
+
+// Author: Dylan P
+unsigned char* blocks::getPool() const {
+    return pool; // Returns pointer to pool so that other classes can use pool.
+}
+
+//******************************************************************************
+
+// Author: Dylan P
 unsigned int blocks::BMsetBit(unsigned int bitID) {
     unsigned int rc = bitID < itemCount; // Success (1) if bitID is in bounds.
     
