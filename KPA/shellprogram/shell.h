@@ -1,3 +1,6 @@
+#ifndef __SHELL_H
+#define __SHELL_H
+
 // Author: Josiah Winiecki
 
 #include <stdio.h>
@@ -7,6 +10,10 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <cstring>
+#include <string>
+#include "kpaTCP.h"
+
+using namespace std;
 
 //******************************************************************************
 // 				DEFINITIONS
@@ -27,36 +34,40 @@ enum COMMAND {
 	UNKNOWN
 };
 
-// The present working directory of the Shell
-// char *pwdString;
+// Global variables
+extern unsigned int uid, gid;
+extern string pwdStr;
+extern string args;
+extern kpaTCP *tcpSocket;
+extern string credentials;
 
 //******************************************************************************
-// 				FUNCTIONS
+// 				INLINE FUNCTIONS
 //******************************************************************************
 
 // Changes a string containing an operation code to the corresponding enum
 // code.
-inline COMMAND strToCmd(char *str) {
+inline COMMAND strToCmd(string str) {
 	COMMAND rc;
-	if (strcmp(str, "ls")) {
+	if (str == "ls") {
 		rc = LS;
-	} else if (strcmp(str, "cd")) {
+	} else if (str == "cd") {
 		rc = CD;
-	} else if (strcmp(str, "mkdir")) {
+	} else if (str == "mkdir") {
 		rc = MKDIR;
-	} else if (strcmp(str, "pwd")) {
+	} else if (str == "pwd") {
 		rc = PWD;
-	} else if (strcmp(str, "stat")) {
+	} else if (str == "stat") {
 		rc = STAT;
-	} else if (strcmp(str, "touch")) {
+	} else if (str == "touch") {
 		rc = TOUCH;
-	} else if (strcmp(str, "lcp")) {
+	} else if (str == "lcp") {
 		rc = LCPIN;
-	} else if (strcmp(str, "Lcp")) {
+	} else if (str == "Lcp") {
 		rc = LCPOUT;
-	} else if (strcmp(str, "shutdown")) {
+	} else if (str == "shutdown") {
 		rc = SHUTDOWN;
-	} else if (strcmp(str, "exit")) {
+	} else if (str == "exit") {
 		rc = EXIT;
 	} else {
 		rc = UNKNOWN;
@@ -64,50 +75,81 @@ inline COMMAND strToCmd(char *str) {
 	return rc;
 }
 
-// Initializes the client socket used to connect to the File System.
-// int initSock(const char *IP);
+// Extracts the content from an ack returned by the FS process
+inline string getAckArgs(string ack) {
+	// We're expecting an exact format for the string
+	// A byte for return code, a space, then any content
+
+	// Return everything beyond the first two bytes of the string.
+	return ack.substr(2);
+}
+
+// Used to maintain consistent format with args.
+// Does not fix issues inside the string itself.
+inline void trimLR(string &str) {
+	while (str[0] == ' ' && str.length() > 0) {
+		str.erase(0, 1);
+	}
+	while (str.back() == ' ' && str.length() > 0) {
+		str.erase(str.length() - 1, 1);
+	}
+}
+
+// Called once to initialize the system with the given credentials
+inline string genCredentials() {
+	// Return UID:GID. These are global variables.
+	return to_string(uid) + ":" + to_string(gid);
+}
+
+
+//******************************************************************************
+// 				SHELL FUNCTIONS
+//******************************************************************************
+
 
 // Helper function that handles communications between the shell and FS.
 //
-// operation is what to do, givePWD = true will provide pwdString to FS,
+// operation is what to do, givePWD = true will provide pwdStr to FS,
 // and args are optional arguments that were given to the shell by the user.
-// some commands don't have args so the parameter is optional
-char * issueCommand(const char *operation, bool givePWD, char *args = NULL);
-
-/*	temporarily comment these out for compiler messages
+// some commands don't have args so the parameter is optional.
+//
+// Handles message reception as well.
+string issueCommand(const char *operation, bool givePWD, bool useArgs);
 
 // Lists the contents of the current working directory within the FS
 //
-// Makes a request for the contents of the directory that pwdString points to.
+// Makes a request for the contents of the directory that pwdStr points to.
 // The contents are placed on the output stream
 void ls();
 
-cd();
+// Changes the present working directory.
+//
+// Provides to the FS pwdStr and args.
+void cd();
 
 // Creates a new directory within the current working directory in the FS
-mkdir();
+void mkdir();
 
 // Gives the current working directory
+// Does not communicate with FS: just prints pwdStr
 void pwd();
 
 // Returns metadata about a given file.
-stat();
+void stat();
 
-// Creates a file using the given filename
-touch();
+// Creates a file using the given filename if it does not exist.
+// Otherwise updates modified and access times.
+void touch();
 
 // Copies a file from the host OS into the FS
 // Also known as LCPIN
-lcp();
+void lcp();
 
 // Copies a file out of the FS into the host OS
 // Also known as LCPOUT
-Lcp();
+void Lcp();
 
 // Terminates the File System process and closes the Shell.
-shutdown();
+void shutdown();
 
-// Detaches from the FS and terminates the Shell process
-exit();
-
-*/
+#endif

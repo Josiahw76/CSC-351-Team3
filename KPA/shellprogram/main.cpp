@@ -1,5 +1,8 @@
 // Author: Josiah Winiecki
 
+// Many inline functions are defined within the shell.h header file.
+// These include getCredentials() and trimLR().
+
 #include "shell.h"
 #include "kpaTCP.h"
 #include <string>
@@ -10,8 +13,20 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
+
+// Global Variables
 #define DEFAULT_PORT 8080
 #define LOCALHOST "127.0.0.1"
+kpaTCP *tcpSocket;
+
+// Used by virtually every execution call
+string args = "";
+string credentials;
+string pwdStr;
+
+// Phase 1 default values
+unsigned int uid = 0;
+unsigned int gid = 0;
 
 using namespace std;
 
@@ -19,54 +34,77 @@ int main(int argc, char *argv[]) {
 
 	// INIT PHASE
 
+	credentials = genCredentials();
+
+	// This phase can be improved by adding checks for provided IP and port
 	string activeIP = LOCALHOST;
 	int activePort = DEFAULT_PORT;
-
-	// Determine whether to use default or given values
 	
-
-	kpaTCP *tcpSocket = new kpaTCP(activeIP, activePort, false);
-
-
-	/*
-	// Run init with a provided IP value if one was given
-	if (!initSock(argv[1] ? argv[1] : "")) {
-		perror("Init failed");
-		exit(1);
-	}
-	*/
+	tcpSocket = new kpaTCP(activeIP, activePort, false);
 
 
 	// OPERATIONS PHASE
 
-	char input[128];
-	char retString[4096];
-	char command[8];
+	string input, command;
 	COMMAND opcode;
-	unsigned int i = 0;
 	int bytesReceived;
+	bool exitFlag = false;
+	unsigned int i = 0;
 
-	while (true) {
+	while (!exitFlag) {
 
-		// Read input until a newline
-		cin.getline(input, sizeof(input));
-/*
-		// Parse the command.
+		// *************************
+		// * CLEAN AND RESET PHASE *
+		// *************************
+
+		// Reset variables
+		command.clear();
+		i = 0;
+		args.clear();
+
+		// Fetch input from the stream
+		getline(cin, input);
+
+		// *****************
+		// * PARSING PHASE *
+		// *****************
+
+		// Parse the first argument
 		while (input[i] != '\0' && input[i] != ' ') {
-			command[i] = input[i];
+			command += input[i];
 			i++;
-			// Make sure the command isn't out of bounds
-			// for the buffer.
+			// Make sure the command doesn't exceed a max size.
+			// (longest accepted command is 8 characters)
 			if (i > 7) {
 				break;	
-
 				// Rather than take measures here,
 				// opcode of UNKNOWN will catch the error.
 			}
 		}
 
+		// Convert string to COMMAND code
 		opcode = strToCmd(command);
-		// Enter the appropriate function
+		if (opcode != UNKNOWN) {
+			// Get everything after the command
+			args = input.substr(command.length(), input.size());
+
+			// Trim whitespace from the args
+			trimLR(args);
+		} else {
+			// UNKNOWN returns control to the beginning
+			// of the loop.
+			printf("Command \"%s\" not recognized\n",
+					command.c_str());
+			continue;
+		}
+		// *******************
+		// * EXECUTION PHASE *
+		// *******************
+		
+		printf("Recognized command %s", command.c_str());
+		
+		// Enter the appropriate function.
+		// By now it should be impossible to have an invalid code.
 		switch (opcode) {
 			case LS:
 			ls();
@@ -100,34 +138,32 @@ int main(int argc, char *argv[]) {
 			Lcp();
 			break;
 
+			// Shutdown flows down into exit.
+			// both cases result in termination of this program.
 			case SHUTDOWN:
 			shutdown();
-			break;
 
 			case EXIT:
-			exit();
-			break;
-
-			case "":
+			exitFlag = true;
+			printf("Closing shell...\n");
 			break;
 
 			default:
-			printf("Error: Command not recognized.\n");
+			printf("Default case for opcode test. Wow\n");
 		} 
-		// Prep read variables for next use
-		memset(command, ' ', sizeof(command));
-		i = 0;
-*/
+
+		/* Debug lines for connection testing
+		tcpSocket->commsWrite(input, sizeof(input));
+
 		// Receive results of command from FS
-		bytesReceived = tcpSocket->commsWrite(retString, 
+		bytesReceived = tcpSocket->commsRead(retString, 
 					sizeof(retString));
 		if (bytesReceived > 0) {
 			// Append message with null terminator to avoid
 			// reading into bad values.
 			retString[bytesReceived] = '\0';
 		}
-		// Return string processing
-		// ...
+		*/
 	}
 
 	// SHUTDOWN PHASE
