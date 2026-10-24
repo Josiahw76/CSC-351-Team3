@@ -25,7 +25,7 @@ class blocks {
         unsigned int itemSize; // Used for allignment within the block array.
         
         // Number of bytes needed for bitmap, plus one extra if leftovers exist.
-        unsigned int bitmapByteCount = (itemCount/8) + ((itemCount%8) > 0);
+        unsigned int bitmapByteCount;
         
         // Tracks free and used items. Traverse the array until a byte < 255 is
         // found, then use bitwise operations to find the free bit.
@@ -37,7 +37,7 @@ class blocks {
         
     public:
         // Allocates sufficient memory for itemCount in bitmap and byte array.
-        blocks();
+        blocks(unsigned int itemCount, unsigned int itemSize);
         
         // Deallocates dynamic memory to prevent leak.
         ~blocks();
