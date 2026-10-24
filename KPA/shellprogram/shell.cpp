@@ -6,7 +6,7 @@
 
 using namespace std;
 
-string issueCommand(const char *operation, bool givePWD, bool useArgs) {
+string issueCommand(SYS_CALL call, bool givePWD, bool useArgs) {
 
 	// Receives feedback from commsRead operation
 	char rc[4096];
@@ -17,7 +17,9 @@ string issueCommand(const char *operation, bool givePWD, bool useArgs) {
 
 	// A command string will take the form:
 	// <op> <credentials> [pwd] [args]
-	string msg = operation;
+
+	// Static cast preserves the exact numerical value of the enum
+	string msg = static_cast<char>(call);
 
 	// Add credentials next. This can be indicated by a flag
 	// This is a global variable initialized at the start of main
@@ -56,44 +58,35 @@ string issueCommand(const char *operation, bool givePWD, bool useArgs) {
 
 void ls() {
 	// Invoke issueCommand with ls and give pwd to the FS
-	string rc = issueCommand("ls", true, false);
+	// This needs to somehow communicated that it wants to stat
+	// every file in the current directory.
+	string rc = issueCommand("", true, false);
 
 	// Print the formatted contents of rc to the terminal window
 	// ...
 }
 
 void cd() {
+	// string rc = getAckArgs(issueCommand("cd", true, true));
 
-	// Everything in here will be handled by the FS
-	// the internal call will just be chdir, which checks everything.
+	// If args looks like a path, call chdir
+	// If args is .. , call rewinddir
 
-	string rc = getAckArgs(issueCommand("cd", true, true));
-
-	
-	// Deprecated in-function checks
-	/*
+	string rc;
 	// Begin parsing the args if any were given
 	if (!args.empty()) {
 
 		// Check for the backtrack arg and whether backtracking
 		// is possible.
-		if (args.compare("..") && pwdStr.length() <= 1) {
-			args.erase(args.find_last_of('/'), args.length());
+		if (args.compare("..") {
+			rc = issueCommand("rewinddir", true, false);
 		} else {
 			// Args are non-zero and don't contain backtrack flag.
-			string rc = issueCommand("cd", true, true);
-
-			// Now to interpret the string returned by the FS
-
-			bool greenlight;
-			// greenlight = checkCode(rc);
-
-			if (greenlight) {
-				pwdStr.append(args);
-			}
+			rc = issueCommand("chdir", true, true);
 		}
 	}
-	*/
+	// Whatever the FS returns is the canonical pwd.
+	pwdStr = getAckArgs(rc);
 }
 
 void mkdir() {

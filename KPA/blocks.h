@@ -46,7 +46,7 @@ class blocks {
         
         // Restores file system data from backing-store.
         blocks(FILE *store);
-        
+
         // Deallocates dynamic memory to prevent leak.
         ~blocks();
         
@@ -61,7 +61,6 @@ class blocks {
         // Sets or clears specified bit in bitmap to mark as free or used.
         unsigned int BMsetBit(unsigned int bitID);
         unsigned int BMclearBit(unsigned int bitID);
-        
         
 };
 
