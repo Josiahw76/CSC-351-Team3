@@ -3,7 +3,7 @@
 // Team 2: Kam E, Simeon K, Dylan P, Josiah W
 
 //******************************************************************************
-// Author: Dylan Poirier
+// Author: Dylan Poirier, Simeon K
 //******************************************************************************
 
 #include <iostream>
@@ -151,6 +151,55 @@ unsigned int blocks::save(FILE *store) {
     }
     
     return rc;
+}
+
+//******************************************************************************
+
+// Author: Simeon K (Formatted by Dylan P)
+int blocks::findFree() {
+    int rc = -1;
+    
+    for (unsigned int byteIndex = 0; byteIndex < bitmapByteCount; byteIndex++) {
+        // Read the byte as 0–255, even if plain char is signed.
+        unsigned char currentByte = bitmap[byteIndex];
+
+        if (currentByte != 255)
+        {
+            unsigned int bitPosition = 0;
+
+            while (bitPosition < 8 && ((currentByte >> bitPosition) &1) == 1)
+            {
+                bitPosition++;
+            }
+
+            int itemIndex = byteIndex * 8 + bitPosition;
+
+            //Ignore unused padding bits in the last byte of the bitmap.
+            if (itemIndex < itemCount)
+            {
+                rc = itemIndex;
+            }
+        }
+    }
+
+    return rc; // -1 if no free item was found, index of found item otherwise.
+}
+
+//******************************************************************************
+
+// Author: Simeon K
+int blocks::allocate() {
+    int index = findFree();
+
+    //Stop if there are no free items.
+    if (index == -1)
+    {
+        return -1;
+    }
+
+    // Mark the item as used so another allocation cannot use it.
+    BMsetBit(index);
+    return index;
 }
 
 //******************************************************************************

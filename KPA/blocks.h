@@ -55,6 +55,12 @@ class blocks {
         // can be determined.
         unsigned int save(fileDescriptor fd);
         
+        // Return the first free item index, or -1 when full.
+        int findFree();
+        
+        // Reserve a free item. Return its index, or -1 if none are free.
+        int allocate();
+        
         // Returns a pointer to pool array for use in other contexts.
         unsigned char* getPool() const;
         
