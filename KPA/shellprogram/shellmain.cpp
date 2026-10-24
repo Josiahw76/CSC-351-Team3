@@ -4,7 +4,7 @@
 // These include getCredentials() and trimLR().
 
 #include "shell.h"
-#include "kpaTCP.h"
+#include "common.h"
 #include <string>
 #include <stdio.h>
 #include <iostream>
@@ -18,15 +18,13 @@
 #define DEFAULT_PORT 8080
 #define LOCALHOST "127.0.0.1"
 kpaTCP *tcpSocket;
-
-// Used by virtually every execution call
 string args = "";
 string credentials;
 string pwdStr;
 
 // Phase 1 default values
-unsigned int uid = 0;
-unsigned int gid = 0;
+uint8_t uid = 0;
+uint8_t gid = 0;
 
 using namespace std;
 

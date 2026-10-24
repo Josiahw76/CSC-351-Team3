@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include <cstring>
 #include <string>
-#include "kpaTCP.h"
+#include "common.h"
 
 using namespace std;
 
@@ -19,88 +19,16 @@ using namespace std;
 // 				DEFINITIONS
 //******************************************************************************
 
-// Operation codes for switch case statement in the main.
-enum COMMAND {
-	LS,
-	CD,
-	MKDIR,
-	PWD,
-	STAT,
-	TOUCH,
-	LCPIN,
-	LCPOUT,
-	SHUTDOWN,
-	EXIT,
-	UNKNOWN
-};
-
 // Global variables
-extern unsigned int uid, gid;
+extern uint8_t uid, gid;
 extern string pwdStr;
 extern string args;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 
-//******************************************************************************
-// 				INLINE FUNCTIONS
-//******************************************************************************
-
-// Changes a string containing an operation code to the corresponding enum
-// code.
-inline COMMAND strToCmd(string str) {
-	COMMAND rc;
-	if (str == "ls") {
-		rc = LS;
-	} else if (str == "cd") {
-		rc = CD;
-	} else if (str == "mkdir") {
-		rc = MKDIR;
-	} else if (str == "pwd") {
-		rc = PWD;
-	} else if (str == "stat") {
-		rc = STAT;
-	} else if (str == "touch") {
-		rc = TOUCH;
-	} else if (str == "lcp") {
-		rc = LCPIN;
-	} else if (str == "Lcp") {
-		rc = LCPOUT;
-	} else if (str == "shutdown") {
-		rc = SHUTDOWN;
-	} else if (str == "exit") {
-		rc = EXIT;
-	} else {
-		rc = UNKNOWN;
-	}
-	return rc;
-}
-
-// Extracts the content from an ack returned by the FS process
-inline string getAckArgs(string ack) {
-	// We're expecting an exact format for the string
-	// A byte for return code, a space, then any content
-
-	// Return everything beyond the first two bytes of the string.
-	return ack.substr(2);
-}
-
-// Used to maintain consistent format with args.
-// Does not fix issues inside the string itself.
-inline void trimLR(string &str) {
-	while (str[0] == ' ' && str.length() > 0) {
-		str.erase(0, 1);
-	}
-	while (str.back() == ' ' && str.length() > 0) {
-		str.erase(str.length() - 1, 1);
-	}
-}
-
-// Called once to initialize the system with the given credentials
-inline string genCredentials() {
-	// Return UID:GID. These are global variables.
-	return to_string(uid) + ":" + to_string(gid);
-}
-
+// Arguments provided to chained system calls by the functions below.
+// These are used in things like touch to trigger access time updates.
+string altArgs;
 
 //******************************************************************************
 // 				SHELL FUNCTIONS
@@ -114,7 +42,9 @@ inline string genCredentials() {
 // some commands don't have args so the parameter is optional.
 //
 // Handles message reception as well.
-string issueCommand(const char *operation, bool givePWD, bool useArgs);
+// TODO:	auto print error messages if the first byte is an error code.
+// Maybe build in an error handler with a switch case for these?
+string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs = false);
 
 // Lists the contents of the current working directory within the FS
 //
