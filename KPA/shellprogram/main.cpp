@@ -1,5 +1,8 @@
 // Author: Josiah Winiecki
 
+// Many inline functions are defined within the shell.h header file.
+// These include getCredentials() and trimLR().
+
 #include "shell.h"
 #include "kpaTCP.h"
 #include <string>
@@ -15,8 +18,15 @@
 #define DEFAULT_PORT 8080
 #define LOCALHOST "127.0.0.1"
 kpaTCP *tcpSocket;
-string args = ""; // args is global as nearly every command call uses it.
 
+// Used by virtually every execution call
+string args = "";
+string credentials;
+string pwdStr;
+
+// Phase 1 default values
+unsigned int uid = 0;
+unsigned int gid = 0;
 
 using namespace std;
 
@@ -24,61 +34,77 @@ int main(int argc, char *argv[]) {
 
 	// INIT PHASE
 
+	credentials = genCredentials();
+
+	// This phase can be improved by adding checks for provided IP and port
 	string activeIP = LOCALHOST;
 	int activePort = DEFAULT_PORT;
-
-	// Determine whether to use default or given values
 	
 	tcpSocket = new kpaTCP(activeIP, activePort, false);
 
+
 	// OPERATIONS PHASE
 
-	string input;
-	char retString[4096];
-	char command[8];
+	string input, command;
 	COMMAND opcode;
-	unsigned int i = 0;
 	int bytesReceived;
 	bool exitFlag = false;
+	unsigned int i = 0;
 
 	while (!exitFlag) {
-		// Clean variables
-		memset(command, ' ', sizeof(command));
+
+		// *************************
+		// * CLEAN AND RESET PHASE *
+		// *************************
+
+		// Reset variables
+		command.clear();
 		i = 0;
 		args.clear();
 
-		// Read input until a newline
+		// Fetch input from the stream
 		getline(cin, input);
 
-		// Parse the command.
+		// *****************
+		// * PARSING PHASE *
+		// *****************
+
+		// Parse the first argument
 		while (input[i] != '\0' && input[i] != ' ') {
-			command[i] = input[i];
+			command += input[i];
 			i++;
-			// Make sure the command isn't out of bounds
-			// for the buffer.
+			// Make sure the command doesn't exceed a max size.
+			// (longest accepted command is 8 characters)
 			if (i > 7) {
 				break;	
-
 				// Rather than take measures here,
 				// opcode of UNKNOWN will catch the error.
 			}
 		}
-		// Null terminator to prevent reading out of bounds
-		command[i] = '\0';
 
+		// Convert string to COMMAND code
 		opcode = strToCmd(command);
 		if (opcode != UNKNOWN) {
 			// Get everything after the command
-			args = input.substr(strlen(command), input.size());
+			args = input.substr(command.length(), input.size());
 
 			// Trim whitespace from the args
 			trimLR(args);
 		} else {
-			printf("Command \"%s\" not recognized\n",command);
+			// UNKNOWN returns control to the beginning
+			// of the loop.
+			printf("Command \"%s\" not recognized\n",
+					command.c_str());
 			continue;
 		}
+		// *******************
+		// * EXECUTION PHASE *
+		// *******************
 		
-		// Enter the appropriate function
+		printf("Recognized command %s", command.c_str());
+		
+		// Enter the appropriate function.
+		// By now it should be impossible to have an invalid code.
 		switch (opcode) {
 			case LS:
 			ls();
@@ -113,15 +139,17 @@ int main(int argc, char *argv[]) {
 			break;
 
 			// Shutdown flows down into exit.
+			// both cases result in termination of this program.
 			case SHUTDOWN:
 			shutdown();
 
 			case EXIT:
 			exitFlag = true;
+			printf("Closing shell...\n");
 			break;
 
 			default:
-			printf("Error: Invalid input\n");
+			printf("Default case for opcode test. Wow\n");
 		} 
 
 		/* Debug lines for connection testing
