@@ -1,3 +1,16 @@
+// CSC 351 Fall 2026 – Dr. Stephen Wheat
+// KPA Phase 1 - File System Simulation 
+// Team 2: Kam E, Simeon K, Dylan P, Josiah W
+
+//******************************************************************************
+// Author: Dylan Poirier
+// This header file defines the iNode struct, which contains the necessary iNode
+// metadata. A byte array shall store contiguous uninitialized iNode structs.
+// A bitmap shall denote each iNode as free or used. Both the byte array and the
+// btimap shall be part of the Block class, which will perform all necessary
+// operations on iNodes.
+//******************************************************************************
+
 #ifndef INODE_H
 #define INODE_H
 
@@ -31,5 +44,9 @@ typedef struct iNode {
 
 //******************************************************************************
 
+// Initializes iNode struct for use.
+unsigned int iNodeInit(iNode &node);
+
+//******************************************************************************
 
 #endif
