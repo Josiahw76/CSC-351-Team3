@@ -81,12 +81,17 @@ class Scheduler {
 		unsigned int PCBcapacity;
 		unsigned int PCBcount;
 		unsigned int processCount;
-		activeProcess CPU;		
 		const unsigned int priorityCount = 4;
-		PCB *PCBtable;		
+		activeProcess CPU;				
+		PCB *PCBtable;	
+
+		// We actually need a whole new PQ for this based on 
+		// the priority values.
+		// and it needs to accept pcb pointers.	
 		PQ *ReadyState;
-	public:
-		step();		// If there is a running process, execute 
+
+		step();		// If there is a running process, 
+				// execute 
 				// the current instruction of the running 
 				// process. Update the System Clock, and 
 				// the running process’s Time Used, 
@@ -134,11 +139,18 @@ class Scheduler {
 				// the following, in order; step, schedule, 
 				// process blocked states, and printState.
 
+
+
+	public:
+		scheduler();	// Creates the scheduler object, does not
+				// start running anything yet.
+
 		kickOff();	// To get things going, the first process is 
 				// created with the program found in a file 
 				// by the name of “init.txt” and then 
 				// runSystem is called.
-
+				//
+				// True access point of the scheduler.
 
 };
 
