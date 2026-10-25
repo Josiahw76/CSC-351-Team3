@@ -1,7 +1,7 @@
 // template created by Josiah
 
 #include "scheduler.cpp"
-#include "PQ.h"
+#include "pq/PQ.h"
 
 //******************************************************************************
 
