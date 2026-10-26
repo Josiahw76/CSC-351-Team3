@@ -69,8 +69,9 @@ struct PCB {
 				// by one each time sysClock is updated.
 				// The execution of this statement does not
 				// count for blocking period(?)
-	char *instructions; 	// This can just be the whole string until '\n'
+	char **instructions; 	// This can just be the whole string until '\n'
 	unsigned int instructionCount;
+	int value;
 };
 
 
@@ -83,11 +84,8 @@ class Scheduler {
 		const unsigned int priorityCount = 4;
 		activeProcess CPU;				
 		PCB *PCBtable;	
-
-		// We actually need a whole new PQ for this based on 
-		// the priority values.
-		// and it needs to accept pcb pointers.	
 		PQ *ReadyState;
+		int programValue;
 
 		void step();	// If there is a running process, 
 				// execute 

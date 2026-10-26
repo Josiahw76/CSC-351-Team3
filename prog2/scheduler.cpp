@@ -6,11 +6,36 @@
 // Empty PID value, use for initialization and empty checking
 const unsigned int NULL_PID = 999;
 
+// HELPER FUNCTIONS
+int reconstruct_int(char *str) {
+    char a;
+	int count = 0;
+	int reconstructed_int = 0;
+
+	while ((a = str[count]) != '\0') {
+   	 	reconstructed_int *= 10;
+    	reconstructed_int += a - '0';
+    	count++;
+		// Shift current val one left and append the number.
+		// for 15: 00 <- 01 <- 10 <- 15
+	}
+	return reconstructed_int;
+}
+void parseInstruction(char *instr, char * &buf) {
+	unsigned int size = sizeof(instr) - 2;
+	delete [] buf;
+	buf = new char[size];
+
+	for (unsigned int i = 2; i < size; i++) {
+		buf[i - 2] = instr[i];
+	}
+}
+
 //******************************************************************************
 
 // Author: Simeon K
 
-Scheduler::Scheduler() {
+scheduler::Scheduler() {
 	// Initialize the clock and process counts.
 	sysClock = 0;
 	PCBcount = 0;
@@ -42,11 +67,67 @@ void scheduler::step() {
 	if (CPU.runningPID != NULL_PID) {
 		// Now, execute current instruction.
 		// First get the PCB
-		PCB *activeProcess;
-		searchByPID(CPU.runningPID, activeProcess);
+		PCB *currentPID;
+		searchByPID(CPU.runningPID, currentPID);
 
-		switch activeProcess->
+		char *buf;
+		parseInstruction(currentPID->instructions[currentPID->PC], buf);
 
+		switch (currentPID->instructions[currentPID->PC][0]) {
+
+			case 'S':
+			programValue = reconstructInt(buf);
+			break;
+
+			case 'A':
+			programValue += reconstructInt(buf);
+			break;
+	
+			case 'D':
+			programValue -= reconstructInt(buf);
+			break;
+	
+			case 'F':
+			// Create a new process that is an exact copy of current
+			// process
+			PCBtable[PCBcount] = *currentPID;
+
+			// Update values to be unique process
+			PCBtable[PCBcount].PID = PCBcount;
+			PCBtable[PCBcount].PPID = currentPID->PID;
+			PCBtable[PCBcount].PC++;
+			PCBtable[PCBcount].startTime = sysClock;
+			PCBtable[PCBcount].blockTime = 0;
+
+			ReadyState->enq(&PCBtable[PCBcount]);
+			break;
+
+			case 'B':
+			currentPID->blockTime = (unsigned int)reconstructInt(buf);
+			break;
+
+			case 'R':
+			// I think this is overwrite all instructions with
+			// whatever is in the fname. No clue if we have a func
+			// for that already
+			break;
+
+			case 'E':
+			currentPID->PID = NULL_PID;
+			CPU.runningPID = NULL_PID;
+			CPU.timeLeft = 0;
+			break;
+		}
+		sysClock++;
+		CPU.timeslice--;
+		currentPID->timeUsed++;
+		currentPID->PC++;
+		if ((CPU.timeslice == 0) && (currentPID->PID != NULL_PID)) {
+			if (currentPID->priority < 3) {
+				currentPID->priority++;
+			}
+			swapOut();
+		}
 	}
 }
 
@@ -89,6 +170,7 @@ void scheduler::schedule() {
 
 // This is heavy formatting.
 scheduler::printState() {
+
 }
 
 //******************************************************************************
