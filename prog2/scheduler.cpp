@@ -289,6 +289,7 @@ void scheduler::kickOff() {
 	// Then makes a small file called init.txt
 	//  Now, runSystem is called, cause I think its the main point
 	// In this scheduler class.
+// Complete
 (I'm still writing. Just resetting my evil macbook.)
    myScheduler->kickOff();
 	return 1;
