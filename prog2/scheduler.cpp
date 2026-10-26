@@ -6,6 +6,31 @@
 // Empty PID value, use for initialization and empty checking
 const unsigned int NULL_PID = 999;
 
+// HELPER FUNCTIONS
+int reconstruct_int(char *str) {
+    char a;
+	int count = 0;
+	int reconstructed_int = 0;
+
+	while ((a = str[count]) != '\0') {
+   	 	reconstructed_int *= 10;
+    	reconstructed_int += a - '0';
+    	count++;
+		// Shift current val one left and append the number.
+		// for 15: 00 <- 01 <- 10 <- 15
+	}
+	return reconstructed_int;
+}
+void parseInstruction(char *instr, char * &buf) {
+	unsigned int size = sizeof(instr) - 2;
+	delete [] buf;
+	buf = new char[size];
+
+	for (unsigned int i = 2; i < size; i++) {
+		buf[i - 2] = instr[i];
+	}
+}
+
 //******************************************************************************
 
 scheduler::scheduler() {
@@ -21,11 +46,48 @@ void scheduler::step() {
 	if (CPU.runningPID != NULL_PID) {
 		// Now, execute current instruction.
 		// First get the PCB
-		PCB *activeProcess;
-		searchByPID(CPU.runningPID, activeProcess);
+		PCB *currentPID;
+		searchByPID(CPU.runningPID, currentPID);
 
-		switch activeProcess->
+		char *buf;
+		parseInstruction(currentPID->instruction, buf);
 
+		switch (currentPID->instruction[0]) {
+
+			case 'S':
+			programValue = reconstructInt(buf);
+			break;
+
+			case 'A':
+			programValue += reconstructInt(buf);
+			break;
+	
+			case 'D':
+			programValue -= reconstructInt(buf);
+			break;
+	
+			case 'F':
+			break;
+
+			case 'B':
+			break;
+
+			case 'R':
+			break;
+
+			case 'E':
+			break;
+		}
+		sysClock++;
+		CPU.timeslice--;
+		currentPID->timeUsed++;
+		currentPID->PC++;
+		if (CPU.timeslice == 0) {
+			if (currentPID->priority < 3) {
+				currentPID->priority++;
+			}
+			swapOut();
+		}
 	}
 }
 
@@ -68,6 +130,7 @@ void scheduler::schedule() {
 
 // This is heavy formatting.
 scheduler::printState() {
+
 }
 
 //******************************************************************************
