@@ -272,7 +272,7 @@ void scheduler::processBlockedStates() {
 void scheduler::runSystem() {
 	// So run system preps things in order with: schedule,
 	//  step, process and states.
-(I'm still writing. Just resetting.)
+(I'm still writing. Just resetting my evil macbook.)
 	
 }
 
@@ -286,7 +286,7 @@ void scheduler::kickOff() {
 	// Then makes a small file called init.txt
 	//  Now, runSystem is called, cause I think its the main point
 	// In this scheduler class.
-(I'm still writing. Just resetting.)
+(I'm still writing. Just resetting my evil macbook.)
    
 }
 
