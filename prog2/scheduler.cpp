@@ -35,7 +35,7 @@ void parseInstruction(char *instr, char * &buf) {
 
 // Author: Simeon K
 
-Scheduler::Scheduler() {
+scheduler::Scheduler() {
 	// Initialize the clock and process counts.
 	sysClock = 0;
 	PCBcount = 0;
@@ -79,9 +79,9 @@ void scheduler::step() {
 		searchByPID(CPU.runningPID, currentPID);
 
 		char *buf;
-		parseInstruction(currentPID->instruction, buf);
+		parseInstruction(currentPID->instructions[currentPID->PC], buf);
 
-		switch (currentPID->instruction[0]) {
+		switch (currentPID->instructions[currentPID->PC][0]) {
 
 			case 'S':
 			programValue = reconstructInt(buf);
@@ -96,9 +96,19 @@ void scheduler::step() {
 			break;
 	
 			case 'F':
+			// Create a new process that is an exact copy of current
+			// process
+			PCBtable[PCBcount] = *currentPID;
+			PCBtable[PCBcount].PPID = currentPID->PID;
+			PCBtable[PCBcount].PC++;
+			PCBtable[PCBcount].startTime = sysClock;
+			PCBtable[PCBcount].blockTime = 0;
+
+			ReadyState->enq(&PCBtable[PCBcount]);
 			break;
 
 			case 'B':
+			
 			break;
 
 			case 'R':

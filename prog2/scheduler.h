@@ -69,8 +69,9 @@ struct PCB {
 				// by one each time sysClock is updated.
 				// The execution of this statement does not
 				// count for blocking period(?)
-	char *instruction; 	// This can just be the whole string until '\n'
-	unsigned int instructionCount; // ?
+	char **instructions; 	// This can just be the whole string until '\n'
+	unsigned int instructionCount;
+	int value;
 };
 
 
