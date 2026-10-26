@@ -2,6 +2,9 @@
 
 #include "scheduler.cpp"
 #include "pidPQ.h"
+#include <iostream>
+
+using namespace std;
 
 // Empty PID value, use for initialization and empty checking
 const unsigned int NULL_PID = 999;
@@ -176,9 +179,23 @@ void scheduler::schedule() {
 
 //******************************************************************************
 
-// This is heavy formatting.
+// This is just heavy formatting.
 scheduler::printState() {
 
+	char *separator = "*" * 65;
+
+	PCB p = PCBtable[CPU.PID];
+	cout << "CPU PID = " << CPU.runningPID << "  "
+		<< "CPUT timeslice = " << CPU.timeslice << endl;
+	// It's not pretty, but this should be every variable
+	printf("%-6s %-6s %-4s %-4s %-8s %-12s %-10s %-10s\n",
+       "pid", "ppid", "pri", "pc", "value",
+       "timeStart", "timeslice", "timeUsed");
+
+	printf("%-6i %-6i %-4i %-4i %-8i %-12i %-10i %-10i\n",p.PID,p.PPID,
+		p.priority,p.PC,p.value,p.startTime,p.timeslice,p.timeUsed);
+
+	printf("%s",separator);
 }
 
 //******************************************************************************
