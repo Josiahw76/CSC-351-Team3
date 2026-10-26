@@ -273,7 +273,10 @@ void scheduler::runSystem() {
 	// So run system preps things in order with: schedule,
 	//  step, process and states.
 (I'm still writing. Just resetting my evil macbook.)
-	
+	Ready state->deq(process);
+myScheduler->kickOff();
+}
+}
 }
 
 //******************************************************************************
@@ -287,7 +290,9 @@ void scheduler::kickOff() {
 	//  Now, runSystem is called, cause I think its the main point
 	// In this scheduler class.
 (I'm still writing. Just resetting my evil macbook.)
-   
+   myScheduler->kickOff();
+	return 1;
+input.open(init.txt);
 }
 
 //******************************************************************************
