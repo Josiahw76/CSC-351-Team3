@@ -111,7 +111,16 @@ void Scheduler::swapOut() {
 
 //******************************************************************************
 
-scheduler::processBlockedStates() {
+// Author: Josiah W
+
+void scheduler::processBlockedStates() {
+	for (unsigned int i = 0; i < PCBcount; i++) {
+		if (PCBtable[i].blockTime > 0) {
+			if (!--PCBtable[i].blockTime) {
+				ReadyState->enq(&PCBtable[i]);
+			}
+		}
+	}
 }
 
 //******************************************************************************
