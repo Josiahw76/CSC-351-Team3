@@ -99,6 +99,9 @@ void scheduler::step() {
 			// Create a new process that is an exact copy of current
 			// process
 			PCBtable[PCBcount] = *currentPID;
+
+			// Update values to be unique process
+			PCBtable[PCBcount].PID = PCBcount;
 			PCBtable[PCBcount].PPID = currentPID->PID;
 			PCBtable[PCBcount].PC++;
 			PCBtable[PCBcount].startTime = sysClock;
@@ -108,20 +111,26 @@ void scheduler::step() {
 			break;
 
 			case 'B':
-			
+			currentPID->blockTime = (unsigned int)reconstructInt(buf);
 			break;
 
 			case 'R':
+			// I think this is overwrite all instructions with
+			// whatever is in the fname. No clue if we have a func
+			// for that already
 			break;
 
 			case 'E':
+			currentPID->PID = NULL_PID;
+			CPU.runningPID = NULL_PID;
+			CPU.timeLeft = 0;
 			break;
 		}
 		sysClock++;
 		CPU.timeslice--;
 		currentPID->timeUsed++;
 		currentPID->PC++;
-		if (CPU.timeslice == 0) {
+		if ((CPU.timeslice == 0) && (currentPID->PID != NULL_PID)) {
 			if (currentPID->priority < 3) {
 				currentPID->priority++;
 			}
