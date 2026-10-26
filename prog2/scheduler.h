@@ -5,7 +5,7 @@
 
 // Yes, this is the data structures PQ.
 // This PQ was written by Josiah and Dylan.
-#include "pq/PQ.h"
+#include "pidPQ.h"
 
 /*
 The program instructions are:
@@ -100,7 +100,8 @@ class Scheduler {
 				// set the process’s block time accordingly 
 				// and reduce the process’s priority.
 
-		schedule();	// If there is not a running process, then 
+		void schedule();	
+				// If there is not a running process, then 
 				// dequeue one from the ReadyState queue.
 				//  If no process was ready to run, then do 
 				// nothing. Otherwise, if the running process
@@ -116,6 +117,10 @@ class Scheduler {
 				// to be printed.  See the example output for 
 				// the expected format. Note, for PIDs that 
 				// don’t have programs, it prints nothing.
+
+		bool searchByPID(unsigned int PID, PCB * &pcb);
+				// Get the pointer to the process info by
+				// PID
 
 		void swapIn();	// This retrieves the highest priority process 
 				// from the ReadyState queue.  If such a 
