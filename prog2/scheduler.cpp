@@ -1,7 +1,7 @@
 // template created by Josiah
 
 #include "scheduler.cpp"
-#include "pq/PQ.h"
+#include "pidPQ.h"
 
 //******************************************************************************
 
@@ -14,6 +14,8 @@ scheduler::step() {
 }
 
 //******************************************************************************
+
+// Author: Josiah W
 
 scheduler::schedule() {
 	// If there's no running process

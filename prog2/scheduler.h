@@ -5,7 +5,7 @@
 
 // Yes, this is the data structures PQ.
 // This PQ was written by Josiah and Dylan.
-#include "pq/PQ.h"
+#include "pidPQ.h"
 
 /*
 The program instructions are:
