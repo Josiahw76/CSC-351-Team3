@@ -33,8 +33,6 @@ E:  End the program, deleting the process altogether.
 */
 
 
-
-
 // Defined according to the assignment
 enum PRIORITY {
 	HIGH = 0,

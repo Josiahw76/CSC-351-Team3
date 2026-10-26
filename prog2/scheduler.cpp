@@ -9,7 +9,7 @@ using namespace std;
 // Empty PID value, use for initialization and empty checking
 const unsigned int NULL_PID = 999;
 
-// HELPER FUNCTIONS
+// HELPER FUNCTIONS - Josiah W
 int reconstruct_int(char *str) {
     char a;
 	int count = 0;
@@ -62,7 +62,7 @@ scheduler::Scheduler() {
 
 //******************************************************************************
 
-// Author: Josiah
+// Author: Josiah W
 
 void scheduler::step() {
 	// If current running process: execute process
@@ -171,7 +171,8 @@ void scheduler::schedule() {
 
 //******************************************************************************
 
-// This is just heavy formatting.
+// Author: Josiah W
+
 scheduler::printState() {
 
 	char *separator = "*" * 65;
