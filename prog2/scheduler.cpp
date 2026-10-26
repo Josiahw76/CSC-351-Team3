@@ -267,12 +267,27 @@ void scheduler::processBlockedStates() {
 
 //******************************************************************************
 
-scheduler::runSystem() {
+// Author: Kam E
+
+void scheduler::runSystem() {
+	// So run system preps things in order with: schedule,
+	//  step, process and states.
+(I'm still writing. Just resetting.)
+	
 }
 
 //******************************************************************************
 
-scheduler::kickOff() {
+// Author: Kam E
+
+void scheduler::kickOff() {
+	// kickOff "kicks off" if you will. 
+	// It loads this program
+	// Then makes a small file called init.txt
+	//  Now, runSystem is called, cause I think its the main point
+	// In this scheduler class.
+(I'm still writing. Just resetting.)
+   
 }
 
 //******************************************************************************
