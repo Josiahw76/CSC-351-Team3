@@ -56,15 +56,7 @@ scheduler::Scheduler() {
 	//Initialize each PCB entry to NULL_PID so we can tell if it's allocated or not.
 	for (unsigned int i = 0; i < PCBcapacity; i++) {
 		PCBtable[i].PID = NULL_PID;
-		PCBtable[i].PPID = NULL_PID;
-		PCBtable[i].PC = 0;
-		PCBtable[i].priority = HIGH;
-		PCBtable[i].timeslice = 0;
-		PCBtable[i].startTime = 0;
-		PCBtable[i].timeUsed = 0;
 		PCBtable[i].blockTime = 0;
-		PCBtable[i].instructions = nullptr;
-		PCBtable[i].instructionCount = 0;
 	}
 }
 
