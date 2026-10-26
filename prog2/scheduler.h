@@ -69,9 +69,8 @@ struct PCB {
 				// by one each time sysClock is updated.
 				// The execution of this statement does not
 				// count for blocking period(?)
-	// Recommended attributes:
-	// program instructions array
-	// instruction count of above array.
+	char *instructions; 	// This can just be the whole string until '\n'
+	unsigned int instructionCount;
 };
 
 
@@ -90,7 +89,7 @@ class Scheduler {
 		// and it needs to accept pcb pointers.	
 		PQ *ReadyState;
 
-		step();		// If there is a running process, 
+		void step();	// If there is a running process, 
 				// execute 
 				// the current instruction of the running 
 				// process. Update the System Clock, and 
@@ -124,6 +123,7 @@ class Scheduler {
 				// Get the pointer to the process info by
 				// PID
 
+		// Completed by Simeon
 		void swapIn();	// This retrieves the highest priority process 
 				// from the ReadyState queue.  If such a 
 				// process is dequeued, if the process’s time 
@@ -132,6 +132,7 @@ class Scheduler {
 				// This then updates the CPU’s PID and time 
 				// slice values.
 
+		// Completed by Simeon
 		void swapOut();	// This copies the CPU’s time slice value to 
 				// the process’s time slice value and then 
 				// enqueues the process to the ReadyState queue.

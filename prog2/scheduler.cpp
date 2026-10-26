@@ -13,7 +13,20 @@ scheduler::scheduler() {
 
 //******************************************************************************
 
-scheduler::step() {
+// Author: Josiah
+
+void scheduler::step() {
+	// If current running process: execute process
+
+	if (CPU.runningPID != NULL_PID) {
+		// Now, execute current instruction.
+		// First get the PCB
+		PCB *activeProcess;
+		searchByPID(CPU.runningPID, activeProcess);
+
+		switch activeProcess->
+
+	}
 }
 
 //******************************************************************************
@@ -75,8 +88,11 @@ bool scheduler::searchByPID(unsigned int PID, PCB * &pcb) {
 }
 
 //******************************************************************************
+
 //Author: Simeon K
-void Scheduler::swapIn() {
+
+void scheduler::swapIn() {
+
 	// If no process is ready, there is nothing to swap in.
 	if (ReadyState->count() == 0) {
 		return;
@@ -94,19 +110,24 @@ void Scheduler::swapIn() {
 	// Load the process in the CPU.
 	CPU.runningPID = process->PID;
 	CPU.timeLeft = process->timeslice;
-
 }
+
 //******************************************************************************
+
 //Author: Simeon K
+
 void Scheduler::swapOut() {
-	// Save the remaining CPU time, then return this process to the ready queue.
-	unsigned int pid = CPU.runningPID; //Remember which process is leaving the CPU.
+	// Save the remaining CPU time, then return this process to the 
+	// ready queue.
+	unsigned int pid = CPU.runningPID; // Remember which process is 
+					   // leaving the CPU.
 	
 	//Save the remaining time for this process.
 	PCBtable[pid].timeslice = CPU.timeLeft;
 
 	// Put the process back in the ready queue.
 	ReadyState->enq(&PCBtable[pid]);
+	
 }
 
 //******************************************************************************
