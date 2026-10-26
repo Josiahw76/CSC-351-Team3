@@ -100,6 +100,7 @@ class Scheduler {
 				// set the process’s block time accordingly 
 				// and reduce the process’s priority.
 
+		// Completed by Josiah
 		void schedule();	
 				// If there is not a running process, then 
 				// dequeue one from the ReadyState queue.
@@ -118,6 +119,7 @@ class Scheduler {
 				// the expected format. Note, for PIDs that 
 				// don’t have programs, it prints nothing.
 
+		// Completed by Josiah
 		bool searchByPID(unsigned int PID, PCB * &pcb);
 				// Get the pointer to the process info by
 				// PID
@@ -134,7 +136,8 @@ class Scheduler {
 				// the process’s time slice value and then 
 				// enqueues the process to the ReadyState queue.
 
-		processBlockedStates();
+		// Completed by Josiah
+		void processBlockedStates();
 				// this updates the block time for every 
 				// process in the blocked state.  If the 
 				// block time of a process becomes 0, it 
