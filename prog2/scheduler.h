@@ -139,7 +139,7 @@ class Scheduler {
 				// process in the blocked state.  If the 
 				// block time of a process becomes 0, it 
 				// enqueues the process to the ReadyState queue.
-
+        // Completed by Kam
 		runSystem();	// While there are allocated PCBs, this does 
 				// the following, in order; step, schedule, 
 				// process blocked states, and printState.
@@ -149,7 +149,7 @@ class Scheduler {
 	public:
 		Scheduler();	// Creates the scheduler object, does not
 				// start running anything yet.
-
+        // Completed by Kam
 		kickOff();	// To get things going, the first process is 
 				// created with the program found in a file 
 				// by the name of “init.txt” and then 
