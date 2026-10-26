@@ -151,7 +151,7 @@ class Scheduler {
 
 
 	public:
-		scheduler();	// Creates the scheduler object, does not
+		Scheduler();	// Creates the scheduler object, does not
 				// start running anything yet.
 
 		kickOff();	// To get things going, the first process is 
