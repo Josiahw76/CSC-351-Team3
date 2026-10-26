@@ -117,7 +117,7 @@ class Scheduler {
 				// the expected format. Note, for PIDs that 
 				// don’t have programs, it prints nothing.
 
-		swapIn();	// This retrieves the highest priority process 
+		void swapIn();	// This retrieves the highest priority process 
 				// from the ReadyState queue.  If such a 
 				// process is dequeued, if the process’s time 
 				// slice is 0, this sets the time slice 
@@ -125,7 +125,7 @@ class Scheduler {
 				// This then updates the CPU’s PID and time 
 				// slice values.
 
-		swapOut();	// This copies the CPU’s time slice value to 
+		void swapOut();	// This copies the CPU’s time slice value to 
 				// the process’s time slice value and then 
 				// enqueues the process to the ReadyState queue.
 
