@@ -1,6 +1,8 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+// Author: Josiah W
+
 #include <string>
 #include <stdio.h>
 

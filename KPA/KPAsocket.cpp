@@ -1,4 +1,5 @@
 // Author: Josiah Winiecki
+// Everything in here was written by me unless a comment notes otherwise.
 
 #include "common.h"
 #include "KPAsocket.h"
@@ -48,12 +49,89 @@ string receiveCommand() {
 		// call ' ' uid ':' gid ' '
 		// one byte each, so begin from position 6
 		args = rc.substr(6, rc.size());
+
 	}
-	// No else needed, the system knows not to read from args
-	// depending on the system call made.
+	// No else needed, the system knows only to read from args
+	// when they should be there.
+
+	pwd = extractPath(args);
+
+	switch (call) {
+
+		// cat is phase 2, so not yet
+
+		case _CREAT:
+		// This needs a filename, mode (file or dir), and path.
+		// called by Touch
+
+		creat();
+		break;
+
+		case _OPEN:
+		// Used by touch
+		open()
+		break;
+
+		case _READ:
+		// touch uses this to get a byte to write back to the file
+
+		read();
+		break;
+
+		case _WRITE:
+		// touch uses this to trigger modified time.
+
+		write();
+		break;
+
+		case _STAT:
+		// Called by stat
+
+		stat();
+		break;
+
+		case _MKDIR:
+		// Called by mkdir
+
+		mkdir();
+		break;
+
+		case _RMDIR:
+		// Called by rmdir. recursive delete
+
+		rmdir();
+		break;
+
+		case _CHDIR:
+		// Called by CD
 	
-	// Now, conveniently, the pwd and args are separated by a single
-	// blank, which makes them easy to separate.
-	
-	
+		chdir();
+		break;
+
+		case _REWINDDIR:
+		// Called by CD
+		rewinddir();
+		break;
+
+		case _KILL:
+		// Save the entire FS and break; the while loop in main.
+		kill();
+		break;
+
+		default:
+		printf("Error: bad read of SYS_CALL from string\n");
+		break;
+
 }
+
+string extractPath(string str) {
+	string rc = "";
+	size_t pos;
+
+	if (str.size() > 0) {
+		pos = str.find_first_of(' ');
+		rc = str.substr(0, pos);
+	}
+	return rc;
+}
+

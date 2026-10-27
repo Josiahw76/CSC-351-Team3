@@ -16,6 +16,7 @@
 
 // Stores arguments provided by shell in the receiveCommand function.
 string args;
+string pwd;
 
 //*****************************************************************************
 // 				FUNCTIONS
@@ -24,9 +25,8 @@ string args;
 // Initiate the TCP port with whatever values were given
 void startTCP(string ip, int port);
 
-
 string receiveCommand();
 
-
+string extractPath(string str);
 
 #endif

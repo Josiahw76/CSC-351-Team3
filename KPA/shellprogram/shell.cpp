@@ -1,4 +1,5 @@
 // Author: Josiah Winiecki
+// Everything in here was written by me unless a comment notes otherwise.
 
 #include <string>
 #include "common.h"
@@ -152,6 +153,14 @@ void touch() {
 	}
 }
 
+// Tells the FS to save and shut down
+void shutdown() {
+	string rc = issueCommand(_KILL, false, false);
+}
+
+//******************************************************************************
+/// Fstream functions. These are next on my list.
+
 // LCPIN
 void lcp() {
 
@@ -162,10 +171,6 @@ void Lcp() {
 
 }
 
-// Tells the FS to save and shut down
-void shutdown() {
-	string rc = issueCommand(_KILL, false, false);
-}
 
 // Exit is handled in the switch case statement in main, 
 // so no need to do anything here.
