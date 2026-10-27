@@ -172,12 +172,12 @@ int blocks::findFree() {
                 bitPosition++;
             }
 
-            int itemIndex = byteIndex * 8 + bitPosition;
+            unsigned int itemIndex = byteIndex * 8 + bitPosition; //changed to unsigned int sk
 
             //Ignore unused padding bits in the last byte of the bitmap.
             if (itemIndex < itemCount)
             {
-                rc = itemIndex;
+                return itemIndex; // Stop at the first free item. SK
             }
         }
     }

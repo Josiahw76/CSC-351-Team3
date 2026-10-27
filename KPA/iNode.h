@@ -22,7 +22,7 @@
 // Represents fileTypes in readable format. Can be expanded for up to 255 types.
 typedef enum fileType : uint8_t {
     DIR = 0,
-    FILE = 1
+    FILE_TYPE = 1
 } fileType;
 
 //******************************************************************************
