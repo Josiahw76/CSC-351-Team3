@@ -14,14 +14,22 @@ fdTable::fdTable() {
 }
 
 //******************************************************************************
-
+// Author: Kam E
 fdTable::~fdTable() {
+deleteFiles = Entry[tableCount];
+	for (unsigned int i = 0; i < table
+	deleteFiles = Entry[tableCount];
+	
 	delete [] openFiles;
 }
 
 //******************************************************************************
-
+// Author: Kam E
 unsigned int fdTable::add_entry(Entry file) {
+	tableInsert = 1;
+	openFiles = new File[tableCount];
+	// So, this adds a new file to the table, with the tableCount counting it to table capacity 
+	//I'm not done with this yet.
 	
 }
 
@@ -32,7 +40,7 @@ void fdTable::rm_entry(unsigned int fd) {
 }
 
 //******************************************************************************
-
+// Author: Kam E
 unsigned int fdTable::openf(unsigned int address, char fmode) {
 	unsigned int fd;
 
@@ -40,7 +48,7 @@ unsigned int fdTable::openf(unsigned int address, char fmode) {
 }
 
 //******************************************************************************
-
+// Author: Kam E
 void fdTable::closef(unsigned int fd) {
 
 }
