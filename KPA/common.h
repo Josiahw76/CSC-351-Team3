@@ -60,6 +60,7 @@ enum SYS_CALL : uint8_t {
 	_CLOSEDIR,
 	_READDIR,
 	_REWINDDIR,
+	_LS,
 	_KILL
 };
 

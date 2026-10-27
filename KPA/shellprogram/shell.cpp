@@ -69,9 +69,9 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 
 void ls() {
 	// Invoke issueCommand with ls and give pwd to the FS
-	// This needs to somehow communicated that it wants to stat
+	// This needs to somehow communicate that it wants to stat
 	// every file in the current directory.
-	string rc = issueCommand("", true, false);
+	string rc = issueCommand("_LS", true, false);
 
 	// Print the formatted contents of rc to the terminal window
 	// ...
