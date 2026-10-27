@@ -9,8 +9,8 @@
 // DataBlocks and 64B iNodes.
 //******************************************************************************
 
-#ifndef BLOCKS_H
-#define BLOCKS_H
+#ifndef __BLOCKS_H
+#define __BLOCKS_H
 
 #include <cstdint>
 #include <cstdio>
