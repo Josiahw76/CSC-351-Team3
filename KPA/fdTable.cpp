@@ -33,8 +33,10 @@ void fdTable::rm_entry(unsigned int fd) {
 
 //******************************************************************************
 
-void fdTable::openf(unsigned int address, char mode) {
+unsigned int fdTable::openf(unsigned int address, char fmode) {
+	unsigned int fd;
 
+	return fd;
 }
 
 //******************************************************************************

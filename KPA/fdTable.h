@@ -23,7 +23,7 @@ class fdTable {
 		fdTable();
 		~fdTable();
 
-		void openf(unsigned int address, char mode);
+		unsigned int openf(unsigned int address, char fmode);
 		void closef(unsigned int fd);
 };
 
