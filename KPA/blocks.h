@@ -53,7 +53,7 @@ class blocks {
         // Saves necessarry data to provided backing store. The itemCount and
         // itemSize go first, so that the length of the bitmap and byte array
         // can be determined.
-        unsigned int save(fileDescriptor fd);
+        unsigned int save(FILE *store);
         
         // Return the first free item index, or -1 when full.
         int findFree();
