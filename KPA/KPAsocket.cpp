@@ -58,70 +58,74 @@ string receiveCommand() {
 
 	switch (call) {
 
-		// cat is phase 2, so not yet
-
 		case _CREAT:
 		// This needs a filename, mode (file or dir), and path.
 		// called by Touch
 
-		creat();
+		rc = creat();
 		break;
 
 		case _OPEN:
 		// Used by touch
-		open()
+		rc = open()
 		break;
 
 		case _READ:
 		// touch uses this to get a byte to write back to the file
 
-		read();
+		rc = read();
 		break;
 
 		case _WRITE:
 		// touch uses this to trigger modified time.
 
-		write();
+		rc = write();
 		break;
 
 		case _STAT:
 		// Called by stat
 
-		stat();
+		rc = stat();
 		break;
 
 		case _MKDIR:
 		// Called by mkdir
 
-		mkdir();
+		rc = mkdir();
 		break;
 
 		case _RMDIR:
 		// Called by rmdir. recursive delete
 
-		rmdir();
+		rc = rmdir();
 		break;
 
 		case _CHDIR:
 		// Called by CD
 	
-		chdir();
+		rc = chdir();
 		break;
 
 		case _REWINDDIR:
 		// Called by CD
-		rewinddir();
+		rc = rewinddir();
 		break;
 
 		case _KILL:
-		// Save the entire FS and break; the while loop in main.
-		kill();
+		// Save the entire FS and break the while loop in main.
+		rc = kill();
 		break;
 
 		default:
 		printf("Error: bad read of SYS_CALL from string\n");
 		break;
-
+	}
+	// Once the system call has been executed, it's time to return the
+	// string.
+	
+	// Convert to char array and send over the wire
+	char *buf = rc.c_str();
+	commsWrite(buf, sizeof(buf));
 }
 
 string extractPath(string str) {
