@@ -1,9 +1,11 @@
 #ifndef __FDTABLE_H
 #define __FDTABLE_H
 
+// Template created by Josiah
+
 struct Entry {
 	unsigned int fileAddress;
-	char mode; // r = read, w = write, a = append
+	char fmode; // r = read, w = write, a = append, n = null
 };
 
 class fdTable {
@@ -13,13 +15,16 @@ class fdTable {
 		unsigned int tableCapacity;
 		unsigned int tableCount;
 
-		unsigned int tableInsert(Entry file);
+		// Returns a file descriptor
+		unsigned int add_entry(Entry file);
+		void rm_entry(unsigned int fd);
 	public:
-		fdTable(unsigned int tableCapacity = 2);
+		// capacity is 2 by default
+		fdTable();
 		~fdTable();
 
-		openf(unsigned int address, char mode);
-		closef();
+		void openf(unsigned int address, char mode);
+		void closef(unsigned int fd);
 };
 
 #endif
