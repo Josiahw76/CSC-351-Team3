@@ -34,8 +34,11 @@ unsigned int fdTable::add_entry(Entry file) {
 }
 
 //******************************************************************************
-
+// Author: Kam E
 void fdTable::rm_entry(unsigned int fd) {
+	//Remove directory: Path + FileName
+	// Something I'm going to write later.
+	
 
 }
 
