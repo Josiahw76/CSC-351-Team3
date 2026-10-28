@@ -191,7 +191,8 @@ string my_chdir(string path, string pwd) {
 if (current == -1 || iNodePool[current].type != DIR) {
     return failure;
 }
-
+// this below will never occur.
+// If shell receives "..", it calls rewinddir - Josiah
 if (path == "..") {
     string::size_type slash = target.find_last_of('/');
     target = target.substr(0, slash);

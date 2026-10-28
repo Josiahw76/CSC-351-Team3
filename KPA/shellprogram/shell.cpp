@@ -9,31 +9,6 @@
 
 using namespace std;
 
-string formatStat(string mdata) {
-	string formatted = "";
-	
-	/*
-Order of metadata:
-
-The name of the file
-The permission bits
-The number of references pointing to the file
-The name of the file owner
-The name of the permissions group
-The file size in bytes
-The last modified date
-The type of the iNode, either directory or file
-	*/
-
-// -rw-r--r--@  1 josiah  staff    9880 Aug 24 18:34 blocKDemo.cpp
-// permissions links owner group  fsize      date      name
-//
-// permissions are a set of 3 octal numbers denoting permissions per group
-// how the hell do I convert that
-
-	return formatted;
-}
-
 string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 
 	// Receives feedback from commsRead operation
