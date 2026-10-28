@@ -2,10 +2,39 @@
 // Everything in here was written by me unless a comment notes otherwise.
 
 #include <string>
+#include <stdio.h>
 #include "common.h"
 #include "shell.h"
 
+
 using namespace std;
+
+string formatStat(string mdata) {
+	string formatted = "";
+	
+	/*
+Order of metadata:
+
+The name of the file
+The permission bits
+The number of references pointing to the file
+The name of the file owner
+The name of the permissions group
+The file size in bytes
+The last modified date
+The type of the iNode, either directory or file
+	*/
+
+// -rw-r--r--@  1 josiah  staff    9880 Aug 24 18:34 blocKDemo.cpp
+// permissions links owner group  fsize      date      name
+//
+// permissions are a set of 3 octal numbers denoting permissions per group
+// how the hell do I convert that
+
+	// convert each 
+
+	return formatted;
+}
 
 string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 
@@ -74,7 +103,7 @@ void ls() {
 	string rc = issueCommand("_LS", true, false);
 
 	// Print the formatted contents of rc to the terminal window
-	// ...
+	// TODO
 }
 
 void cd() {
@@ -99,7 +128,6 @@ void cd() {
 }
 
 void mkdir() {
-	// Quick and dirty
 	string rc = issueCommand(_MKDIR, true, true);
 }
 
@@ -119,6 +147,7 @@ void stat() {
 		string data = getAckArgs(rc);
 	}
 	// Now we would print to terminal window
+	
 }
 
 void touch() {
@@ -130,16 +159,12 @@ void touch() {
 	// If the file exists, we want to update the access time fields
 	// If not, we want to create it.
 
-	// If the file can be opened, then it exists and we can
-	// write a single byte to affect the time fields.
-	rc = issueCommand(_OPEN, true, true);
+	// Pre-emptively acquire the first byte to write back.
+	altArgs = "args that mean get first byte";
+	rc = issueCommand(_READ, true, false, true);
 
+	// If this fails, the file doesn't exist
 	if (rc[0] > 0) {
-		// This indicates a success code and lets us continue
-		// with rewriting a byte.
-		altArgs = "args that mean get first byte";
-		rc = issueCommand(_READ, true, false, true);
-
 		// Now put the byte back into the first position.
 		altArgs = getAckArgs(rc) + "num that means 0th position";
 		rc = issueCommand(_WRITE, true, false, true);
@@ -147,9 +172,8 @@ void touch() {
 		altArgs.clear();
 	} else {
 		// I think a file name is sufficient for this sys call.
+		// Create is not mkdir, so yes.
 		string rc = issueCommand(_CREAT, true, true);
-
-		// Note that create simply won't do anything if the file exists.
 	}
 }
 
@@ -159,17 +183,67 @@ void shutdown() {
 }
 
 //******************************************************************************
-/// Fstream functions. These are next on my list.
+/// File read/write functions. These are next on my list.
 
 // LCPIN
 void lcp() {
+	// Gotta parse the args here...
+	// <source> <dest>
+	size_t pos = args.find_first_of(' ');
+	string fname = args.substr(0, pos);
+	FILE *file = fopen(fname.c_str(), "r");
+	if (file) {
+		// Make sure it's reading from the beginning of the file
+		rewind(file);
 
+		// Get the file size
+		unsigned int size = ftell(file);
+		char buffer[size];
+
+		// Dump the file into the buffer
+		fread(buffer, 1, size, file);
+
+		// Now touch filename to make sure it exists
+		// First, args must be modified to only include filename.
+		args = args.substr(pos + 1, string::npos);
+		issueCommand(_TOUCH, true, true);
+
+		// Add the file contents to args
+		args += buffer;
+		issueCommand(_WRITE, true, true);
+
+		fclose(file);
+	}
 }
 
 // LCPOUT
 void Lcp() {
+	// Get the separator
+	size_t pos = args.find_first_of(' ');
+	// Get the host filename
+	string fname = args.substr(pos + 1, string::npos);
+	// Open host file
+	FILE *file = fopen(fname.c_str(), "w");
 
+	// Prep the args for read operation
+	// fd, buffer, nbytes
+
+	// Get filename of FS file
+	args = args.substr(0, pos);
+
+	// We can't do buffer here and we don't know how many
+	// bytes to put for nbytes, so default value there is the 
+	// entire length of the file, meaning all bytes
+	string rc = issueCommand(_READ, true, true);
+	if (!rc[0] < 0) {
+		// Write rc.size() number of 1 byte items from rc to file.
+		fwrite(rc.c_str(), 1, rc.size(), file);
+	} else {
+		checkCode(rc);	
+	}	
+	fclose(file);
 }
+
 
 
 // Exit is handled in the switch case statement in main, 
