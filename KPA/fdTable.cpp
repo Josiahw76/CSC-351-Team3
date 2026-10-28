@@ -1,6 +1,6 @@
 #include "fdTable.h"
 
-// Template created by Josiah
+// Author: Josiah W
 
 //******************************************************************************
 
@@ -14,45 +14,49 @@ fdTable::fdTable() {
 }
 
 //******************************************************************************
-// Author: Josiah
+
 fdTable::~fdTable() {
 	delete [] openFiles;
 }
 
 //******************************************************************************
-// Author: Kam E
+
 unsigned int fdTable::add_entry(Entry file) {
-	tableInsert = 1;
-	openFiles = new File[tableCount]; // <- this is very incorrect.
-					 // you are trying to reassign the array
-					 // to a std file object
-	// So, this adds a new file to the table, with the tableCount counting it to table capacity 
-	//I'm not done with this yet.
-	
-}
-
-//******************************************************************************
-// Author: Kam E
-void fdTable::rm_entry(unsigned int fd) {
-	//Remove directory: Path + FileName
-	// ^^^^ no. this is "closing" the file by clearing the array entry.
-	// Something I'm going to write later.
-	
-
-}
-
-//******************************************************************************
-// Author: Kam E
-unsigned int fdTable::openf(unsigned int address, char fmode) {
 	unsigned int fd;
 
+	// Because of the way we use this table, it can literally never be
+	// full.
+	// Although there are two entries, we still iterate because it's
+	// a scalable behavior, unlike boolean array assignment.
+	// If we wanted to expand this, not much would need rewrite.
+
+	for (unsigned int i = 0; i < tableCapacity; i++) {
+		// n means null, or empty
+		if (openFiles[i].fmode == 'n') {
+			// Save it there and pass back the index
+			openFiles[i] = file;
+			fd = i;
+			break;
+		}
+	}
 	return fd;
 }
 
 //******************************************************************************
-// Author: Kam E
-void fdTable::closef(unsigned int fd) {
 
+unsigned int fdTable::openf(unsigned int address, char fmode) {
+	// Construct the entry
+	Entry file = {address, fmode};
+
+	// pass back the fd given on insertion
+	return add_entry(file);
+
+}
+
+//******************************************************************************
+
+void fdTable::closef(unsigned int fd) {
+	openFiles[fd].fmode = 'n';	
 }
 
 //******************************************************************************

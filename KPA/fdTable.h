@@ -17,7 +17,6 @@ class fdTable {
 
 		// Returns a file descriptor
 		unsigned int add_entry(Entry file);
-		void rm_entry(unsigned int fd);
 	public:
 		// capacity is 2 by default
 		fdTable();
