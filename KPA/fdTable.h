@@ -16,14 +16,14 @@ struct Entry {
 class fdTable {
 
 	private:
-		Entry *openFiles;
-		unsigned int tableCapacity;
 		unsigned int tableCount;
 
 		// Returns a file descriptor
 		unsigned int add_entry(Entry file);
 	public:
 		// capacity is 2 by default
+		Entry *openFiles;
+		unsigned int tableCapacity;
 		fdTable();
 		~fdTable();
 
