@@ -1,6 +1,7 @@
 #include "kpaFScommands.h"
 #include <ctime>
 #include <queue>
+#include <cstring>
 
 //******************************************************************************
 
@@ -9,12 +10,17 @@
 bool parseCreateArgs(string requestArgs, string &name){
     name.clear();
 
-    //pwd is seperate and these arguments contain the file name.
-    if(requestArgs.empty() || requestArgs.find_first_not_of(' ') == string::npos) {
+    // Reject a missing file name or one containing only spaces.
+    if (requestArgs.empty() || requestArgs.find_first_not_of(' ') == string::npos) {
         return false;
     }
 
-    // Leave room for the ending '\0' in the direcctory entry.
+    // The directory is passed seperately
+    if (requestArgs.find('/') != string::npos) {
+        return false;
+    }
+
+    // Leave room for the ending '\0' in the directory entry
     if (requestArgs.size() >= fnameMaxSize) {
         return false;
     }
@@ -191,30 +197,21 @@ string my_chdir(string path, string pwd) {
 if (current == -1 || iNodePool[current].type != DIR) {
     return failure;
 }
-// this below will never occur.
-// If shell receives "..", it calls rewinddir - Josiah
-if (path == "..") {
-    string::size_type slash = target.find_last_of('/');
-    target = target.substr(0, slash);
-    if (target.empty()) {
-        target = "/";
-    }
-} else {
-    // Split the requested path into directory names
-    queue<string> names;
-    string::size_type start = 0;
 
-    while (start < path.size()) {
-        string::size_type end = path.find ('/', start);
-        if (end == string::npos) {
-            end = path.size();
-        }
+// Split the requested path into directory names
+queue<string> names;
+string::size_type start = 0;
 
-        if (end > start) {
-            names.push(path.substr(start, end - start));
-        }
-        start = end + 1;
+while (start < path.size()) {
+    string::size_type end = path.find ('/', start);
+    if (end == string::npos) {
+        end = path.size();
     }
+    if (end > start) {
+        names.push(path.substr(start, end - start));
+    }
+    start = end + 1;
+}
 
     // Search from the selected starting iNode
     while (!names.empty()) {
@@ -233,10 +230,75 @@ if (path == "..") {
         }
         target += name;
     }
+
+    string reply (1, 1);
+    reply += ' ';
+    reply += target;
+    return reply;
 }
 
-string reply(1, 1);
-reply += ' ';
-reply += target;
-return reply;
+uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t nbytes) {
+    // Record when this read was performed
+    node.aTime = time(NULL);
+    if (position >= node.size) {
+        return 0;
+    }
+
+    // Limit the request to the bytes remaining in the file
+    uint32_t remaining = node.size - position;
+    if (nbytes > remaining) {
+        nbytes = remaining;
+    }
+
+    uint32_t copied = 0;
+
+    while (copied < nbytes) {
+        uint32_t fileBlock = position / blockSize;
+        uint32_t offset = position % blockSize;
+
+        // Follow the first index block, then the second index block
+        indexType secondBlock = blockPool[node.addr].index[fileBlock / indexPerBlock];
+        indexType dataBlock = blockPool[secondBlock].index[fileBlock % indexPerBlock];
+
+        // Copy only the part that fits in this data block
+        uint32_t count = blockSize - offset;
+        if (count > nbytes - copied) {
+            count = nbytes - copied;
+        }
+
+        memcpy(buffer + copied, blockPool[dataBlock].data + offset, count);
+        position += count;
+        copied += count;
+    }
+
+    return copied;
+}
+
+string my_rewinddir(string pwd) {
+    // Invalid path replies keep the shell's exiting pwd
+    string failure (1, -3);
+    failure += ' ';
+    failure += pwd;
+
+    if (findDirectoryByPath(pwd, iNodePool, blockPool) == -1) {
+        return failure;
+    }
+
+    // Removee trailing slashes before finding the parent
+    while (pwd.size() > 1 && pwd.back() == '/') {
+        pwd.pop_back();
+    }
+
+    string::size_type slash = pwd.find_last_of('/');
+    pwd = pwd.substr(0, slash);
+
+    // Root's parent is still root
+    if (pwd.empty()) {
+        pwd = "/";
+    }
+
+    string reply (1, 1);
+    reply += ' ';
+    reply += pwd;
+    return reply;
 }
