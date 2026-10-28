@@ -57,4 +57,12 @@ extern db *blockPool;
 // Return a status byte, a space, and the pwd.
 string my_chdir(string path, string pwd);
 
+// Copy file bytes and advance position and Return the number copied
+// The caller supplies enough buffer space for the bytes being read
+uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t nbytes);
+
+// Return the parent directory for the shell's cd .. request
+string my_rewinddir(string pwd);
+
+
 #endif

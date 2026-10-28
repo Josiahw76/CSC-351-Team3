@@ -47,7 +47,7 @@ unsigned int fdTable::add_entry(Entry file) {
 
 unsigned int fdTable::openf(unsigned int address, char fmode) {
 	// Construct the entry
-	Entry file = {address, fmode};
+	Entry file = {address, fmode, 0};
 
 	// pass back the fd given on insertion
 	return add_entry(file);
