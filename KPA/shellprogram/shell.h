@@ -34,7 +34,6 @@ string altArgs;
 // 				SHELL FUNCTIONS
 //******************************************************************************
 
-
 // Helper function that handles communications between the shell and FS.
 //
 // operation is what to do, givePWD = true will provide pwdStr to FS,

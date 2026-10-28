@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
 	int bytesReceived;
 	bool exitFlag = false;
 	unsigned int i = 0;
+	pwdStr = "/";
 
 	while (!exitFlag) {
 

@@ -1,0 +1,34 @@
+#ifndef __FDTABLE_H
+#define __FDTABLE_H
+
+// To be included by the FS process
+// Any function requiring use of open() and close() must have access
+// to this class definition.
+
+// Author: Josiah
+
+struct Entry {
+	unsigned int fileAddress;
+	char fmode; // r = read, w = write, a = append, n = null
+	unsigned int fp; // File pointer to track byte position. starts at 0
+};
+
+class fdTable {
+
+	private:
+		Entry *openFiles;
+		unsigned int tableCapacity;
+		unsigned int tableCount;
+
+		// Returns a file descriptor
+		unsigned int add_entry(Entry file);
+	public:
+		// capacity is 2 by default
+		fdTable();
+		~fdTable();
+
+		unsigned int openf(unsigned int address, char fmode);
+		void closef(unsigned int fd);
+};
+
+#endif

@@ -1,3 +1,5 @@
+// Author: Josiah W
+
 #include "common.h"
 #include <iostream>
 #include <sys/socket.h>
@@ -72,6 +74,11 @@ void checkCode(string rc) {
 		printf("Permission denied.\n");
 		break;
 
+		// The given path was invalid somehow.
+		case -3:
+		printf("Error: invalid path");
+		break;
+
 		// Error code is not something we expected
 		default:
 			printf("Unknown error\n");
@@ -96,6 +103,8 @@ string genCredentials() {
 //*****************************************************************************
 // 				KPATCP FUNCTIONS
 //*****************************************************************************
+
+// I (Josiah) did not write these, they were provided in the kpaTCP source.
 
 kpaTCP::kpaTCP(string serverIPaddress, int serverPort, bool serverFlag) {
     serverPortNumber = serverPort;

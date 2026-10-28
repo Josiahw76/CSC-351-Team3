@@ -1,6 +1,8 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+// Author: Josiah W
+
 #include <string>
 #include <stdio.h>
 
@@ -58,6 +60,7 @@ enum SYS_CALL : uint8_t {
 	_CLOSEDIR,
 	_READDIR,
 	_REWINDDIR,
+	_LS,
 	_KILL
 };
 

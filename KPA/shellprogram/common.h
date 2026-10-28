@@ -58,6 +58,7 @@ enum SYS_CALL {
 	_CLOSEDIR,
 	_READDIR,
 	_REWINDDIR,
+	_LS,
 	_KILL
 };
 

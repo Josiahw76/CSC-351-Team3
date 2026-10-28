@@ -9,8 +9,8 @@
 // DataBlocks and 64B iNodes.
 //******************************************************************************
 
-#ifndef BLOCKS_H
-#define BLOCKS_H
+#ifndef __BLOCKS_H
+#define __BLOCKS_H
 
 #include <cstdint>
 #include <cstdio>
@@ -53,7 +53,7 @@ class blocks {
         // Saves necessarry data to provided backing store. The itemCount and
         // itemSize go first, so that the length of the bitmap and byte array
         // can be determined.
-        unsigned int save(fileDescriptor fd);
+        unsigned int save(FILE *store);
         
         // Return the first free item index, or -1 when full.
         int findFree();
