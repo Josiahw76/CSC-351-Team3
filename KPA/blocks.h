@@ -3,7 +3,7 @@
 // Team 2: Kam E, Simeon K, Dylan P, Josiah W
 
 //******************************************************************************
-// Author: Simeon Karne, Dylan Poirier
+// Authors: Simeon Karne, Dylan Poirier
 // The blocks class contains a bitmap and a byte array to store data in blocks
 // and track which blocks are free. It is generalized to accomadate both 4096KB
 // DataBlocks and 64B iNodes.
