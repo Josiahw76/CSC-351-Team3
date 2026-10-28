@@ -10,6 +10,7 @@
 struct Entry {
 	unsigned int fileAddress;
 	char fmode; // r = read, w = write, a = append, n = null
+	unsigned int fp; // File pointer to track byte position. starts at 0
 };
 
 class fdTable {
