@@ -31,8 +31,6 @@ The type of the iNode, either directory or file
 // permissions are a set of 3 octal numbers denoting permissions per group
 // how the hell do I convert that
 
-	// convert each 
-
 	return formatted;
 }
 

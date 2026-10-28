@@ -24,8 +24,8 @@ fdTable::~fdTable() {
 unsigned int fdTable::add_entry(Entry file) {
 	tableInsert = 1;
 	openFiles = new File[tableCount]; // <- this is very incorrect.
-									  // you are trying to reassign the array
-									  // to a std file object
+					 // you are trying to reassign the array
+					 // to a std file object
 	// So, this adds a new file to the table, with the tableCount counting it to table capacity 
 	//I'm not done with this yet.
 	
