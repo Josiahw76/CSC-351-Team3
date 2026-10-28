@@ -14,12 +14,8 @@ fdTable::fdTable() {
 }
 
 //******************************************************************************
-// Author: Kam E
+// Author: Josiah
 fdTable::~fdTable() {
-deleteFiles = Entry[tableCount];
-	for (unsigned int i = 0; i < table
-	deleteFiles = Entry[tableCount];
-	
 	delete [] openFiles;
 }
 
@@ -27,7 +23,9 @@ deleteFiles = Entry[tableCount];
 // Author: Kam E
 unsigned int fdTable::add_entry(Entry file) {
 	tableInsert = 1;
-	openFiles = new File[tableCount];
+	openFiles = new File[tableCount]; // <- this is very incorrect.
+									  // you are trying to reassign the array
+									  // to a std file object
 	// So, this adds a new file to the table, with the tableCount counting it to table capacity 
 	//I'm not done with this yet.
 	
@@ -37,6 +35,7 @@ unsigned int fdTable::add_entry(Entry file) {
 // Author: Kam E
 void fdTable::rm_entry(unsigned int fd) {
 	//Remove directory: Path + FileName
+	// ^^^^ no. this is "closing" the file by clearing the array entry.
 	// Something I'm going to write later.
 	
 
