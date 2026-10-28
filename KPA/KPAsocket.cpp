@@ -64,7 +64,7 @@ string receiveCommand() {
 		// This needs a filename, mode (file or dir), and path.
 		// called by Touch
 
-		rc = creat();
+		rc = my_creat();
 		break;
 
 		case _OPEN:
@@ -87,7 +87,7 @@ string receiveCommand() {
 		case _STAT:
 		// Called by stat
 
-		rc = stat();
+		rc = my_stat();
 		break;
 
 		case _MKDIR:

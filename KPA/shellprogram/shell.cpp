@@ -9,6 +9,8 @@
 
 using namespace std;
 
+//******************************************************************************
+
 string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 
 	// Receives feedback from commsRead operation
@@ -70,6 +72,8 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 	return rc_str;
 }
 
+//******************************************************************************
+
 void ls() {
 	// Invoke issueCommand with ls and give pwd to the FS
 	// This needs to somehow communicate that it wants to stat
@@ -78,7 +82,12 @@ void ls() {
 
 	// Print the formatted contents of rc to the terminal window
 	// TODO
+	// should be sufficient. ls should append newlines after
+	// each stat.
+	printf("%s\n", rc.c_str());
 }
+
+//******************************************************************************
 
 void cd() {
 	// If args looks like a path, call chdir
@@ -101,15 +110,21 @@ void cd() {
 	pwdStr = getAckArgs(rc);
 }
 
+//******************************************************************************
+
 void mkdir() {
 	string rc = issueCommand(_MKDIR, true, true);
 }
+
+//******************************************************************************
 
 void pwd() {
 	// Quick and dirty terminal print
 	const char *pwd = pwdStr.c_str();
 	printf("%s\n", pwd);
 }
+
+//******************************************************************************
 
 void stat() {
 	string rc = issueCommand(_STAT, false, true);
@@ -119,14 +134,15 @@ void stat() {
 		
 		// Data ready for parse
 		string data = getAckArgs(rc);
+
+		// Print it
+		printf("%s\n", data.c_str());
 	}
-	// Now we would print to terminal window
-	
 }
 
+//******************************************************************************
+
 void touch() {
-	// Q. Where are the cases handled?
-	// A. Within this function using a series of system calls.
 
 	string rc;
 
@@ -151,13 +167,14 @@ void touch() {
 	}
 }
 
+//******************************************************************************
+
 // Tells the FS to save and shut down
 void shutdown() {
 	string rc = issueCommand(_KILL, false, false);
 }
 
 //******************************************************************************
-/// File read/write functions. These are next on my list.
 
 // LCPIN
 void lcp() {
@@ -188,7 +205,10 @@ void lcp() {
 
 		fclose(file);
 	}
+
 }
+
+//******************************************************************************
 
 // LCPOUT
 void Lcp() {
@@ -212,9 +232,7 @@ void Lcp() {
 	if (!((int)rc[0] < 0)) {
 		// Write rc.size() number of 1 byte items from rc to file.
 		fwrite(rc.c_str(), 1, rc.size(), file);
-	} else {
-		checkCode(rc);	
-	}	
+	}
 	fclose(file);
 }
 
