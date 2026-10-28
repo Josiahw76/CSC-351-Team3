@@ -28,7 +28,7 @@ extern string credentials;
 
 // Arguments provided to chained system calls by the functions below.
 // These are used in things like touch to trigger access time updates.
-string altArgs;
+extern string altArgs;
 
 //******************************************************************************
 // 				SHELL FUNCTIONS

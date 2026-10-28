@@ -240,3 +240,35 @@ reply += ' ';
 reply += target;
 return reply;
 }
+
+// Author: Josiah
+
+string my_stat(unsigned int addr) {
+/* Need to return every bit of metadata about the file.
+The permission bits
+The number of references pointing to the file
+The name of the file owner
+The name of the permissions group
+The file size in bytes
+The last modified date
+The type of the iNode, either directory or file
+The name of the file
+	*/ 
+	// Get a copy of the iNode
+	iNode file = iNodePool[addr];
+
+	// Now append everything to the string
+	string mdata = formatPermissions(file.perms) + ' ';
+	mdata += to_string(file.nLinks) + ' ';
+	mdata += to_string(file.uid) + ' ';
+	mdata += to_string(file.gid) + ' ';
+	mdata += to_string(file.size) + ' ';
+	mdata += to_string(file.aTime) + ' ';
+	mdata += to_string(file.type) + ' ';
+
+	// Need to get the name of the file from directory now
+	dirEntry entry = directoryBlock[addr];
+	mdata += entry.filename;
+
+	return mdata;
+}

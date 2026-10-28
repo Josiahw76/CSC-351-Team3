@@ -22,7 +22,8 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 	// <op> <credentials> [pwd] [args]
 
 	// Static cast preserves the exact numerical value of the enum
-	string msg = static_cast<char>(call);
+	string msg = " ";
+	msg[0] = static_cast<char>(call);
 
 	// Add credentials next. This can be indicated by a flag
 	// This is a global variable initialized at the start of main
@@ -73,7 +74,7 @@ void ls() {
 	// Invoke issueCommand with ls and give pwd to the FS
 	// This needs to somehow communicate that it wants to stat
 	// every file in the current directory.
-	string rc = issueCommand("_LS", true, false);
+	string rc = issueCommand(_LS, true, false);
 
 	// Print the formatted contents of rc to the terminal window
 	// TODO
@@ -89,7 +90,7 @@ void cd() {
 
 		// Check for the backtrack arg and whether backtracking
 		// is possible.
-		if (args.compare("..") {
+		if (args.compare("..")) {
 			rc = issueCommand(_REWINDDIR, true, false);
 		} else {
 			// Args are non-zero and don't contain backtrack flag.
@@ -106,7 +107,7 @@ void mkdir() {
 
 void pwd() {
 	// Quick and dirty terminal print
-	char *pwd = pwdStr.c_str();
+	const char *pwd = pwdStr.c_str();
 	printf("%s\n", pwd);
 }
 
@@ -137,7 +138,7 @@ void touch() {
 	rc = issueCommand(_READ, true, false, true);
 
 	// If this fails, the file doesn't exist
-	if (rc[0] > 0) {
+	if ((int)rc[0] > 0) {
 		// Now put the byte back into the first position.
 		altArgs = getAckArgs(rc) + "num that means 0th position";
 		rc = issueCommand(_WRITE, true, false, true);
@@ -171,7 +172,7 @@ void lcp() {
 
 		// Get the file size
 		unsigned int size = ftell(file);
-		char buffer[size];
+		char *buffer = new char[size];
 
 		// Dump the file into the buffer
 		fread(buffer, 1, size, file);
@@ -179,7 +180,7 @@ void lcp() {
 		// Now touch filename to make sure it exists
 		// First, args must be modified to only include filename.
 		args = args.substr(pos + 1, string::npos);
-		issueCommand(_TOUCH, true, true);
+		touch();
 
 		// Add the file contents to args
 		args += buffer;
@@ -208,7 +209,7 @@ void Lcp() {
 	// bytes to put for nbytes, so default value there is the 
 	// entire length of the file, meaning all bytes
 	string rc = issueCommand(_READ, true, true);
-	if (!rc[0] < 0) {
+	if (!((int)rc[0] < 0)) {
 		// Write rc.size() number of 1 byte items from rc to file.
 		fwrite(rc.c_str(), 1, rc.size(), file);
 	} else {
