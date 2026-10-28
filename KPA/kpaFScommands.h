@@ -2,6 +2,7 @@
 #define KPAFSCOMMANDS_H
 #include <string>
 #include "iNode.h"
+#include "fdTable.h"
 
 using namespace std;
 
@@ -64,5 +65,8 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 // Return the parent directory for the shell's cd .. request
 string my_rewinddir(string pwd);
 
+// Return bytes read, -1 for invalid input or -2 for a non readable mode
+// nbytes = -1 uses the inode's size. the called provides enough buffer space
+int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes = -1);
 
 #endif

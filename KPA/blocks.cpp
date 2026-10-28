@@ -177,7 +177,7 @@ int blocks::findFree() {
             //Ignore unused padding bits in the last byte of the bitmap.
             if (itemIndex < itemCount)
             {
-                return itemIndex; // Stop at the first free item. SK
+                rc = itemIndex; // Stop at the first free item. SK
             }
         }
     }
@@ -188,18 +188,16 @@ int blocks::findFree() {
 //******************************************************************************
 
 // Author: Simeon K
-int blocks::allocate() {
-    int index = findFree();
+int blocks::allocate() { // Find and reserve one available item.
+    int index = findFree(); // Find a free item without reserving it yet.
 
     //Stop if there are no free items.
     if (index == -1)
     {
-        return -1;
+        BMsetBit(index); // Mark that item as allocated.
     }
 
-    // Mark the item as used so another allocation cannot use it.
-    BMsetBit(index);
-    return index;
+    return index; // Return the allocated index, or -1 when full.
 }
 
 //******************************************************************************
