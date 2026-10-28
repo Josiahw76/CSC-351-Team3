@@ -1,7 +1,11 @@
 #ifndef __FDTABLE_H
 #define __FDTABLE_H
 
-// Template created by Josiah
+// To be included by the FS process
+// Any function requiring use of open() and close() must have access
+// to this class definition.
+
+// Author: Josiah
 
 struct Entry {
 	unsigned int fileAddress;
