@@ -16,6 +16,7 @@ fdTable::fdTable() {
 //******************************************************************************
 // Author: Josiah
 fdTable::~fdTable() {
+	// kam, this function is one line and was already done.
 	delete [] openFiles;
 }
 
