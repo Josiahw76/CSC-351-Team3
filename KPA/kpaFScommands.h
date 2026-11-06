@@ -69,4 +69,7 @@ string my_rewinddir(string pwd);
 // nbytes = -1 uses the inode's size. the called provides enough buffer space
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes = -1);
 
+// Return 1 when closed or -1 for an invalid or unused descriptor
+int my_close(fdTable &table, unsigned int fd);
+
 #endif

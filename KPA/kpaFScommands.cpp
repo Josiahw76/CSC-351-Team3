@@ -117,27 +117,28 @@ int findINodeInDirectory(const iNode &directory, const db blockPool [], string n
         
         for (unsigned int i = 0; i < indexPerBlock && entriesLeft > 0 && result == -1; i++) // Stop when match is found or entires run out
         {
-        const indexType *secondIndex = blockPool[firstIndex[i]].index; // Follow the address to. a second index block
-
-        for (unsigned int j = 0; j < indexPerBlock && entriesLeft > 0 && result == -1; j++) { // Search data blocks until match is found
+            const indexType *secondIndex = blockPool[firstIndex[i]].index; // Follow the address to. a second index block
             
-            const dirEntryType *entries = blockPool[secondIndex[j]].dirEntry; //View this data block as dir entries
+            for (unsigned int j = 0; j < indexPerBlock && entriesLeft > 0 && result == -1; j++) { // Search data blocks until match is found
+        
+                const dirEntryType *entries = blockPool[secondIndex[j]].dirEntry; //View this data block as dir entries
 
-            // The final block may contain fewer entries;
-            unsigned int count = entriesLeft; // Start with the number of entries still unchecked
-            if (count > dirEntryPerBlock) { // Check whether more than one block of entries are left
+                // The final block may contain fewer entries;
+                unsigned int count = entriesLeft; // Start with the number of entries still unchecked
+                if (count > dirEntryPerBlock) { // Check whether more than one block of entries are left
                 count = dirEntryPerBlock; // Limit the search to one block.
-            }
+                }
 
-            int position = findDirectoryEntry(entries, count, name); // Search the valid entries in the block
-            if (position != -1) { // Use the entry only when a matching name is found
-                result = entries[position].iNodeIndex; // Save its inode index so both loops stop
+                int position = findDirectoryEntry(entries, count, name); // Search the valid entries in the block
+                if (position != -1) { // Use the entry only when a matching name is found
+                    result = entries[position].iNodeIndex; // Save its inode index so both loops stop
+                }
+                
+                entriesLeft -= count; // remove the entries checked in this block
             }
-
-            entriesLeft -= count; // remove the entries checked in this block
         }
-    }
 
+    }
     return result; // return the matching inode index; or -1 when missing 
 }
 
@@ -270,7 +271,7 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
         // Limit the request to the bytes remaining in the file
         if (nbytes > remaining) { // check wheter request goes beyond EOF
-            nbytes = remaining // limit the request to the remaining bytes
+            nbytes = remaining; // limit the request to the remaining bytes
         }
 
         while (copied < nbytes) { // continue until the requested bytes have been copied
@@ -378,7 +379,18 @@ int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // rea
     return result; //return the byte count or the saved error result
 }
 
-            
+// Author: Simeon K
 
-        // Passing fp by reference updates this open file's position
-        
+// Close an open file descriptor
+int my_close(fdTable &table, unsigned int fd) {
+    int result = -1; // Invalid or already closed desciprtor
+
+    // Check the index before accessing its entry.
+    if (fd < table.tableCapacity && table.openFiles[fd].fmode != 'n') {
+        // Release this descriptor slot for reuse.
+        table.closef(fd);
+        result = 1; // success
+    }
+
+    return result; // return result of the close attempt.
+}

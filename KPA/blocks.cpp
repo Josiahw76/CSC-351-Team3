@@ -159,7 +159,7 @@ unsigned int blocks::save(FILE *store) {
 int blocks::findFree() {
     int rc = -1;
     
-    for (unsigned int byteIndex = 0; byteIndex < bitmapByteCount; byteIndex++) {
+    for (unsigned int byteIndex = 0; byteIndex < bitmapByteCount && rc == -1; byteIndex++) {
         // Read the byte as 0–255, even if plain char is signed.
         unsigned char currentByte = bitmap[byteIndex];
 
@@ -191,8 +191,8 @@ int blocks::findFree() {
 int blocks::allocate() { // Find and reserve one available item.
     int index = findFree(); // Find a free item without reserving it yet.
 
-    //Stop if there are no free items.
-    if (index == -1)
+    // Reserve the item only when a free one was found.
+    if (index != -1)
     {
         BMsetBit(index); // Mark that item as allocated.
     }
