@@ -11,7 +11,7 @@ using namespace std;
 
 //******************************************************************************
 
-string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
+string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
 
 	// Receives feedback from commsRead operation
 	char rc[4096];
@@ -48,10 +48,17 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs) {
 
 	// This is for chained system calls. The functions below use these
 	// occasionally for very specific behaviors
-	} else if (altArgs) {
+	} else if (useAlts) {
 		msg += ' ' + altArgs;
 	}
 
+	// PHASE 2 TODO
+	// Q. How do we handle pwd, relative path, and absolute path?
+	//    Somehow determining whether the pwd should be given requires
+	//    meaningfully parsing an absolute path out of the args.
+	// A. look for a '/' at the beginning of args. This means root.
+	//    root will never be given as a path unless it means
+	//    absolute path
 
 	// If everything is good, send payload to FS
 	if (doWrite) { 
@@ -99,7 +106,8 @@ void cd() {
 
 		// Check for the backtrack arg and whether backtracking
 		// is possible.
-		if (args.compare("..")) {
+		// TODO fix no arg error
+		if (args.compare("..") == true) {
 			rc = issueCommand(_REWINDDIR, true, false);
 		} else {
 			// Args are non-zero and don't contain backtrack flag.
@@ -107,7 +115,7 @@ void cd() {
 		}
 	}
 	// Whatever the FS returns is the canonical pwd.
-	pwdStr = getAckArgs(rc);
+	// pwdStr = getAckArgs(rc);
 }
 
 //******************************************************************************

@@ -28,20 +28,6 @@ extern string args;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 
-enum COMMAND : uint8_t {
-	LS,
-	CD,
-	MKDIR,
-	PWD,
-	STAT,
-	TOUCH,
-	LCPIN,
-	LCPOUT,
-	SHUTDOWN,
-	EXIT,
-	UNKNOWN
-};
-
 enum SYS_CALL : uint8_t {
 	_CREAT,
 	_OPEN,

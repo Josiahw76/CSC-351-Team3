@@ -1,6 +1,8 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+// Author: Josiah W
+
 #include <string>
 #include <stdio.h>
 
@@ -26,21 +28,7 @@ extern string args;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 
-enum COMMAND {
-	LS,
-	CD,
-	MKDIR,
-	PWD,
-	STAT,
-	TOUCH,
-	LCPIN,
-	LCPOUT,
-	SHUTDOWN,
-	EXIT,
-	UNKNOWN
-};
-
-enum SYS_CALL {
+enum SYS_CALL : uint8_t {
 	_CREAT,
 	_OPEN,
 	_CLOSE,
@@ -60,6 +48,21 @@ enum SYS_CALL {
 	_REWINDDIR,
 	_LS,
 	_KILL
+};
+
+// Used in shell main for switch case statement
+enum COMMAND : uint8_t {
+	LS,
+	CD,
+	MKDIR,
+	PWD,
+	STAT,
+	TOUCH,
+	LCPIN,
+	LCPOUT,
+	SHUTDOWN,
+	EXIT,
+	UNKNOWN
 };
 
 //******************************************************************************

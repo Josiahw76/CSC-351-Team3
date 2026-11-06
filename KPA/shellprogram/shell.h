@@ -43,7 +43,7 @@ extern string altArgs;
 // Handles message reception as well.
 // TODO:	auto print error messages if the first byte is an error code.
 // Maybe build in an error handler with a switch case for these?
-string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool altArgs = false);
+string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts = false);
 
 // Lists the contents of the current working directory within the FS
 //

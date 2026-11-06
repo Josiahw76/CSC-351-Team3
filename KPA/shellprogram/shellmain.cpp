@@ -21,6 +21,7 @@ kpaTCP *tcpSocket;
 string args = "";
 string credentials;
 string pwdStr;
+string altArgs;
 
 // Phase 1 default values
 uint8_t uid = 0;
@@ -28,7 +29,7 @@ uint8_t gid = 0;
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(/*int argc, char *argv[]*/) {
 
 	// INIT PHASE
 
@@ -100,7 +101,7 @@ int main(int argc, char *argv[]) {
 		// * EXECUTION PHASE *
 		// *******************
 		
-		printf("Recognized command %s", command.c_str());
+		printf("Recognized command %s\n", command.c_str());
 		
 		// Enter the appropriate function.
 		// By now it should be impossible to have an invalid code.
