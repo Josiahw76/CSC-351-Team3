@@ -31,13 +31,11 @@ string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 	// This is a global variable initialized at the start of main
 	msg += ' ' + credentials;
 
-	// PWD section below is to be updated for phase 2
+	// pwd is given to the command now, so include it here.
+	// If it's supposed to be blank, the caller handles that.
+	msg += pwd;
 
-	// Check if PWD was indicated
-	if (givePWD) {
-		msg += ' ' + pwdStr;
-	}
-	// Check if we're adding args_raw
+	// Check if we're adding raw args
 	if (useArgs) {
 		msg += ' ' + args_raw;
 
@@ -53,7 +51,6 @@ string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 	} else if (useAlts) {
 		msg += ' ' + altArgs;
 	}
-
 
 	// ***********************************************
 	// ************* Send data to FS *****************
@@ -145,29 +142,24 @@ void ls() {
 //******************************************************************************
 
 void cd() {
-	// If args_raw looks like a path, call chdir
-	// If args_raw is .. , call rewinddir
-
 	string rc;
-	// Begin parsing the args_raw if any were given
-	if (!args_raw.empty()) {
-		issueCommand()
+
+	if (argCount == 0) {
+		string wd = prepPath(args[0], false);
+		rc = issueCommand(_CHDIR, wd, false, false);
+		pwdStr = getAckArgs(rc);
+	} else {
+		printf("Error: exactly one argument allowed for cd\n");
 	}
-	// Whatever the FS returns is the canonical pwd.
-	// pwdStr = getAckArgs(rc);
 }
 
 //******************************************************************************
 
 void mkdir() {
 	string wd;
-	char type;
 	for (unsigned int i = 0; i < argCount; i++) {
-		wd = formatPath(args[i], type);
-		
-
-
-		string rc = issueCommand(_MKDIR, wd, false);
+		wd = prepPath(args[i]);
+		string rc = issueCommand(_MKDIR, wd, false, true);
 	}
 
 }
@@ -183,7 +175,13 @@ void pwd() {
 //******************************************************************************
 
 void stat() {
-	string rc = issueCommand(_STAT, false, true);
+	if (argCount == 1) {
+		string wd = prepPath(args[0], false);
+		string rc = issueCommand(_STAT, wd, false, false);
+	} else {
+		printf("Error: exactly one argument allowed for cd\n");
+		return;
+	}
 
 	// Cast first byte as int and check if it indicates success.
 	if ((int)rc[0] > 0) {
@@ -205,7 +203,7 @@ void touch() {
 	// If not, we want to create it.
 
 	// Pre-emptively acquire the first byte to write back.
-	altArgs = "get first byte";
+	altArgs = ;
 	rc = issueCommand(_READ, true, false, true);
 
 	// If this fails, the file doesn't exist
