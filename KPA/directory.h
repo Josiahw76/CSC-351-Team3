@@ -28,7 +28,7 @@ typedef struct dirEntry {
 
 class Directory {        
     private:
-        unsigned int resolvePath(std::string path, string &target);
+        unsigned int resolvePath(std::string path, std::string &target);
         
         // Initializes iNode struct for use.
         unsigned int iNodeInit(iNode &node, fileType type, blocks *dataBlocks);
@@ -45,10 +45,10 @@ class Directory {
         
         unsigned int addEntry(const char *filename, unsigned int iNodeIndex);
         
-        unsigned int removeEntry(
+        unsigned int removeEntry();
         
 
-}
+};
     
 
 

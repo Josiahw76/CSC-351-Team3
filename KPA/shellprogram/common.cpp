@@ -42,6 +42,26 @@ COMMAND strToCmd(string str) {
 		rc = SHUTDOWN;
 	} else if (str == "exit") {
 		rc = EXIT;
+	} else if (str == "rm") {
+		rc = RM;
+	} else if (str == "rmdir") {
+		rc = RMDIR;
+	} else if (str == "chmod") {
+		rc = CHMOD;
+	} else if (str == "chown") {
+		rc = CHOWN;
+	} else if (str == "setUIDGID") {
+		rc = SUGID;
+	} else if (str == "setUmask") {
+		rc = SUMASK;
+	} else if (str == "cp") {
+		rc = CP;
+	} else if (str == "mv") {
+		rc = MV;
+	} else if (str == "cat") {
+		rc = CAT;
+	} else if (str == "ln") {
+		rc = LN;
 	} else {
 		rc = UNKNOWN;
 	}

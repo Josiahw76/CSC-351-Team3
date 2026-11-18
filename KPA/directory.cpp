@@ -14,14 +14,14 @@ using namespace std;
 
 //******************************************************************************
 
-int directory::resolvePath(string path, string &target) {
+int Directory::resolvePath(string path, string &target) {
     
 }        
         
 //******************************************************************************
 
 // Author: Dylan P
-unsigned int directory::iNodeInit(iNode &node, blocks *data) {
+unsigned int Directory::iNodeInit(iNode &node, blocks *data) {
     unsigned int rc = data->findFree() == -1 ? 0 : 1;
     
     if (rc) {
@@ -47,7 +47,7 @@ unsigned int directory::iNodeInit(iNode &node, blocks *data) {
 //******************************************************************************
 
 // Author: Dylan P
-unsigned int directory::stringToChars(string src, char *dst) {
+unsigned int Directory::stringToChars(string src, char *dst) {
     unsigned rc = src.length() < 32;
     
     if (rc) {
@@ -64,7 +64,7 @@ unsigned int directory::stringToChars(string src, char *dst) {
 //******************************************************************************
 
 // Author: Dylan Poirier
-unsigned int directory::search(unsigned int dirIndex, string target, 
+unsigned int Directory::search(unsigned int dirIndex, string target, 
                                                       unsigned int *index) {
     unsigned int rc = 0;
     iNode *iNodePool = (iNode*) iNodes->getPool();
@@ -90,7 +90,7 @@ unsigned int directory::search(unsigned int dirIndex, string target,
 //******************************************************************************
 
 // Author: Dylan Poirier
-unsigned int directory::mkdir(string path, blocks *iNodes, blocks *dataBlocks) {
+unsigned int Directory::mkdir(string path, blocks *iNodes, blocks *dataBlocks) {
     iNode *iNodePool = (iNode*) iNodes->getPool();
     string target;
     int pathIndex = resolvePath(path, target);

@@ -301,16 +301,7 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 // Author: Josiah
 
 string my_stat(unsigned int addr) {
-/* Need to return every bit of metadata about the file.
-The permission bits
-The number of references pointing to the file
-The name of the file owner
-The name of the permissions group
-The file size in bytes
-The last modified date
-The type of the iNode, either directory or file
-The name of the file
-	*/ 
+
 	// Get a copy of the iNode
 	iNode file = iNodePool[addr];
 
@@ -328,22 +319,6 @@ The name of the file
 	mdata += entry.filename;
 
 	return mdata;
-}
-
-string my_rewinddir(string pwd) { //return the parent of the shell's current path
-    if (pwd != "/") { // leave root unchanged
-        pwd = pwd.substr(0, pwd.find_last_of('/')); // remove the final slash and directory name
-
-        if (pwd.empty()) { //removing a root child's name leaves and empty string
-            pwd = "/"; // represent its parent as root
-        }
-    }
-
-    string reply (1, 1); // start with existing success status byte
-    reply += ' '; // Separate the status from the path
-    reply += pwd; // Add the parent path to the reply
-
-    return reply; // return the completed reply
 }
 
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor

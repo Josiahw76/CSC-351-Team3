@@ -11,7 +11,7 @@ using namespace std;
 
 //******************************************************************************
 
-string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
+string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 
 	// Receives feedback from commsRead operation
 	char rc[4096];
@@ -21,7 +21,7 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
 	bool doWrite = true;
 
 	// A command string will take the form:
-	// <op> <credentials> [pwd] [args]
+	// <op> <credentials> [pwd] [args_raw]
 
 	// Static cast preserves the exact numerical value of the enum
 	string msg = " ";
@@ -31,18 +31,20 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
 	// This is a global variable initialized at the start of main
 	msg += ' ' + credentials;
 
+	// PWD section below is to be updated for phase 2
+
 	// Check if PWD was indicated
 	if (givePWD) {
 		msg += ' ' + pwdStr;
 	}
-	// Check if we're adding args
+	// Check if we're adding args_raw
 	if (useArgs) {
-		msg += ' ' + args;
+		msg += ' ' + args_raw;
 
-	// Otherwise, if args has anything in it, check if it isn't whitespace.
-	// If non-blank characters follow something that doesn't take args,
+	// Otherwise, if args_raw has anything in it, check if it isn't whitespace.
+	// If non-blank characters follow something that doesn't take arguments,
 	// cancel the operation.
-	} else if ((args.length() > 0) && (args.find_first_not_of(' ') != string::npos)) {
+	} else if ((argCount > 0) && (args_raw.find_first_not_of(' ') != string::npos)) {
 		printf("Error: Unexpected arguments\n");
 		doWrite = false;
 
@@ -52,13 +54,10 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
 		msg += ' ' + altArgs;
 	}
 
-	// PHASE 2 TODO
-	// Q. How do we handle pwd, relative path, and absolute path?
-	//    Somehow determining whether the pwd should be given requires
-	//    meaningfully parsing an absolute path out of the args.
-	// A. look for a '/' at the beginning of args. This means root.
-	//    root will never be given as a path unless it means
-	//    absolute path
+
+	// ***********************************************
+	// ************* Send data to FS *****************
+	// ***********************************************
 
 	// If everything is good, send payload to FS
 	if (doWrite) { 
@@ -81,11 +80,60 @@ string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts) {
 
 //******************************************************************************
 
+// dumpArg tells the function to put the target file in altArgs instead of
+// leaving it on the end of the absolute path
+
+string prepPath(string filename, bool dumpArg) {
+	string path;
+	trimLR(filename);
+	
+	// Check for '/' characters. One at the beginning indicates
+	// absolute path, one somewhere in the middle denotes relative path,
+	// none indicates a filename.
+	size_t bs_pos = filename.find_first_of('/');
+
+	// Get path ready
+	if (bs_pos != 0) {
+		// It is not an absolute path, use the one we have saved
+		path = pwdStr;
+		if (bs_pos != string::npos) {
+			// We've determined that it is a relative path.
+			// Get filename saved so we can reuse it.
+			path += filename;
+		}
+
+	} else {
+		// Else, bs at the front means the path is absolute
+		path = filename;
+	}
+
+	if ((bs_pos != string::npos) && dumpArg) {
+			bs_pos = path.find_last_of('/') + 1;
+
+			// Grab everything from after the bs to the end of str
+			filename = substr(bs_pos);
+
+			// Strip the end off including the '/'
+			path.erase(bs_pos - 1);
+
+			altArgs = filename;
+	}
+
+	return path;
+}
+
+//******************************************************************************
+
 void ls() {
-	// Invoke issueCommand with ls and give pwd to the FS
-	// This needs to somehow communicate that it wants to stat
-	// every file in the current directory.
-	string rc = issueCommand(_LS, true, false);
+	// PHASE 2 UPDATES: CHECKS FOR PATH
+	string wd;
+	if (argCount > 0) {
+		wd = prepPath(args[0], false);
+	} else {
+		wd = pwdStr;
+	}
+	
+	string rc = issueCommand(_LS, wd, false);
 
 	// Print the formatted contents of rc to the terminal window
 	// TODO
@@ -97,22 +145,13 @@ void ls() {
 //******************************************************************************
 
 void cd() {
-	// If args looks like a path, call chdir
-	// If args is .. , call rewinddir
+	// If args_raw looks like a path, call chdir
+	// If args_raw is .. , call rewinddir
 
 	string rc;
-	// Begin parsing the args if any were given
-	if (!args.empty()) {
-
-		// Check for the backtrack arg and whether backtracking
-		// is possible.
-		// TODO fix no arg error
-		if (args.compare("..") == true) {
-			rc = issueCommand(_REWINDDIR, true, false);
-		} else {
-			// Args are non-zero and don't contain backtrack flag.
-			rc = issueCommand(_CHDIR, true, true);
-		}
+	// Begin parsing the args_raw if any were given
+	if (!args_raw.empty()) {
+		issueCommand()
 	}
 	// Whatever the FS returns is the canonical pwd.
 	// pwdStr = getAckArgs(rc);
@@ -121,7 +160,16 @@ void cd() {
 //******************************************************************************
 
 void mkdir() {
-	string rc = issueCommand(_MKDIR, true, true);
+	string wd;
+	char type;
+	for (unsigned int i = 0; i < argCount; i++) {
+		wd = formatPath(args[i], type);
+		
+
+
+		string rc = issueCommand(_MKDIR, wd, false);
+	}
+
 }
 
 //******************************************************************************
@@ -151,20 +199,19 @@ void stat() {
 //******************************************************************************
 
 void touch() {
-
 	string rc;
 
 	// If the file exists, we want to update the access time fields
 	// If not, we want to create it.
 
 	// Pre-emptively acquire the first byte to write back.
-	altArgs = "args that mean get first byte";
+	altArgs = "get first byte";
 	rc = issueCommand(_READ, true, false, true);
 
 	// If this fails, the file doesn't exist
 	if ((int)rc[0] > 0) {
 		// Now put the byte back into the first position.
-		altArgs = getAckArgs(rc) + "num that means 0th position";
+		altArgs = getAckArgs(rc) + ' ' + 0;
 		rc = issueCommand(_WRITE, true, false, true);
 
 		altArgs.clear();
@@ -186,10 +233,10 @@ void shutdown() {
 
 // LCPIN
 void lcp() {
-	// Gotta parse the args here...
+	// Gotta parse the args_raw here...
 	// <source> <dest>
-	size_t pos = args.find_first_of(' ');
-	string fname = args.substr(0, pos);
+	size_t pos = args_raw.find_first_of(' ');
+	string fname = args_raw.substr(0, pos);
 	FILE *file = fopen(fname.c_str(), "r");
 	if (file) {
 		// Make sure it's reading from the beginning of the file
@@ -203,12 +250,12 @@ void lcp() {
 		fread(buffer, 1, size, file);
 
 		// Now touch filename to make sure it exists
-		// First, args must be modified to only include filename.
-		args = args.substr(pos + 1, string::npos);
+		// First, args_raw must be modified to only include filename.
+		args_raw = args_raw.substr(pos + 1, string::npos);
 		touch();
 
-		// Add the file contents to args
-		args += buffer;
+		// Add the file contents to args_raw
+		args_raw += buffer;
 		issueCommand(_WRITE, true, true);
 
 		fclose(file);
@@ -221,17 +268,17 @@ void lcp() {
 // LCPOUT
 void Lcp() {
 	// Get the separator
-	size_t pos = args.find_first_of(' ');
+	size_t pos = args_raw.find_first_of(' ');
 	// Get the host filename
-	string fname = args.substr(pos + 1, string::npos);
+	string fname = args_raw.substr(pos + 1, string::npos);
 	// Open host file
 	FILE *file = fopen(fname.c_str(), "w");
 
-	// Prep the args for read operation
+	// Prep the args_raw for read operation
 	// fd, buffer, nbytes
 
 	// Get filename of FS file
-	args = args.substr(0, pos);
+	args_raw = args_raw.substr(0, pos);
 
 	// We can't do buffer here and we don't know how many
 	// bytes to put for nbytes, so default value there is the 
@@ -244,8 +291,28 @@ void Lcp() {
 	fclose(file);
 }
 
+//******************************************************************************
+// PHASE 2 COMMANDS
 
+void rm() {
 
-// Exit is handled in the switch case statement in main, 
-// so no need to do anything here.
+}
+
+void rmdir();
+
+void chmod();
+
+void chown();
+
+void setUIDGID();
+
+void setUmask();
+
+void cp();
+
+void mv();
+
+void cat();
+
+void ln();
 
