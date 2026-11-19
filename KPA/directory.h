@@ -26,36 +26,33 @@ typedef struct dirEntry {
     
 //******************************************************************************
 
-class Directory {        
+class directory {    
     private:
-        unsigned int resolvePath(std::string path, string &target);
+        blocks *iNodes;
+        blocks *dataBlocks;
+        
+        
+    
+        int resolvePath(std::string path, std::string &target);
+        
+        int search(unsigned int dirIndex, std::string target);
         
         // Initializes iNode struct for use.
-        unsigned int iNodeInit(iNode &node, fileType type, blocks *dataBlocks);
+        unsigned int iNodeInit(iNode &node, blocks *dataBlocks);
         
         unsigned int stringToChars(std::string src, char *dst);
-
+        
 //******************************************************************************
 
         
     public:
-        static unsigned int mkdir(std::string path, blocks *iNodes, blocks *dataBlocks);
-   
-        unsigned int search(const char *name);
+        directory(blocks *nodes, blocks *data);
         
-        unsigned int addEntry(const char *filename, unsigned int iNodeIndex);
-        
-        unsigned int removeEntry(
-        
-
-}
-    
-
-
-
-
-
-
+        unsigned int mkdir(std::string path, 
+                                  blocks *iNodes, blocks *dataBlocks);
+           
+       
+};
 
 //******************************************************************************
 

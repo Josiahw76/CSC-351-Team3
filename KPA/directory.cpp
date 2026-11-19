@@ -14,10 +14,53 @@ using namespace std;
 
 //******************************************************************************
 
+// Author: Dylan P
 int directory::resolvePath(string path, string &target) {
+    int rc = -1; // iNode index of path, -1 if no good.
     
+    unsigned int div = 1; // Indexes the beginning of each path item.
+    int curDir = 0; // iNode index of the current directory. 0 for root.
+    string item; // 
+    unsigned int pathLength = path.length();
+    
+    for (unsigned int i = 1; i < pathLength; i++) {
+    // Starting at 1 ignores the '/' root character.
+        if (curDir != -1 && path[i] == '/') {
+            item = path.substr(div, i - div);
+            curDir = search(curDir, item);
+            div = i + 1;
+        }
+    }
+    
+    target = path.substr(div, pathLength - div);
+    
+    rc = curDir >= 0 ? curDir : rc;
+    
+    return rc;
 }        
-        
+
+//******************************************************************************
+
+// Author: Dylan Poirier
+int directory::search(unsigned int dirIndex, string target) {
+    int rc = -1;
+    iNode *iNodePool = (iNode*) iNodes->getPool();
+    unsigned int addr = iNodePool[dirIndex].addr;
+    dirEntry *dir = (dirEntry*) (dataBlocks->getPool() + addr * 4096);
+    unsigned int numEntries = iNodePool[dirIndex].size / sizeof(dirEntry);
+    
+    for (unsigned int i = 0; i < numEntries; i++) {
+        dirEntry currEntry = dir[i];
+        if (strcmp(currEntry.filename, target.c_str()) == 0) {
+            rc = dir[i].iNodeIndex;
+            
+            break;
+        }
+    }
+    
+    return rc;
+}
+
 //******************************************************************************
 
 // Author: Dylan P
@@ -46,7 +89,6 @@ unsigned int directory::iNodeInit(iNode &node, blocks *data) {
 
 //******************************************************************************
 
-// Author: Dylan P
 unsigned int directory::stringToChars(string src, char *dst) {
     unsigned rc = src.length() < 32;
     
@@ -63,54 +105,39 @@ unsigned int directory::stringToChars(string src, char *dst) {
 
 //******************************************************************************
 
-// Author: Dylan Poirier
-unsigned int directory::search(unsigned int dirIndex, string target, 
-                                                      unsigned int *index) {
-    unsigned int rc = 0;
-    iNode *iNodePool = (iNode*) iNodes->getPool();
-    unsigned int addr = iNodePool[dirIndex].addr;
-    dirEntry *dir = (dirEntry*) (dataBlocks->getPool() + addr * 4096);
-    unsigned int numEntries = iNodePool[dirIndex].size / sizeof(dirEntry);
-    
-    for (unsigned int i = 0; i < numEntries; i++) {
-        dirEntry currEntry = dir[i];
-        if (strcmp(currEntry.filename, target.c_str()) == 0) {
-            if (index != nullptr) {
-                *index = dir[i].iNodeIndex;
-            }
-            
-            rc = 1;
-            break;
-        }
-    }
-    
-    return rc;
+directory::directory(blocks *nodes, blocks *data) {
+    iNodes = nodes;
+    dataBlocks = data;
 }
 
 //******************************************************************************
 
 // Author: Dylan Poirier
-unsigned int directory::mkdir(string path, blocks *iNodes, blocks *dataBlocks) {
+unsigned int directory::mkdir(string path) {
+    unsigned int rc;
+    
     iNode *iNodePool = (iNode*) iNodes->getPool();
     string target;
     int pathIndex = resolvePath(path, target);
     if (pathIndex != -1) {
-        unsigned int rc = iNodePool[pathIndex].fileType == DIR;
-    
-        rc = search(pathIndex, target, NULL) ? 0 : rc;
+        rc = iNodePool[pathIndex].type == DIR;
+        
+        rc = search(pathIndex, target) != -1 ? 0 : rc;
     } else {
         rc = 0;
     }
     
     if (rc && iNodes->findFree() != -1 && target.length() < 32) {
-        int dirIndex = iNodes->allocate();
+        unsigned int dirIndex = iNodes->allocate();
         
-        dirEntry parentEntry = {"..", pathIndex};
+        dirEntry parentEntry = {"..", static_cast<unsigned int>(pathIndex)};
         dirEntry selfEntry = {".", dirIndex};
         dirEntry entry {};
         
         iNode *parentNode = &iNodePool[pathIndex];
-        char *parentBlock = dataBlocks->getPool() + (parentNode->addr * 4096);
+        unsigned char *parentBlock = dataBlocks->getPool() + 
+                                     (parentNode->addr * 4096);
+                                     
         stringToChars(target, entry.filename);
         entry.iNodeIndex = dirIndex;
         memcpy(&parentBlock[parentNode->size], &entry, sizeof(dirEntry));
@@ -121,9 +148,9 @@ unsigned int directory::mkdir(string path, blocks *iNodes, blocks *dataBlocks) {
         
         iNode *dir = &iNodePool[dirIndex];
             
-        iNodeInit(dir, dataBlocks);
+        iNodeInit(*dir, dataBlocks);
         
-        char *selfBlock = dataBlocks->getPool() + (dir->addr * 4096);
+        unsigned char *selfBlock = dataBlocks->getPool() + (dir->addr * 4096);
         memcpy(&selfBlock[0], &selfEntry, sizeof(dirEntry));
         memcpy(&selfBlock[sizeof(dirEntry)], &parentEntry, sizeof(dirEntry));
     }
