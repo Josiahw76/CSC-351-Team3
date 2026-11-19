@@ -300,7 +300,7 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
 // Author: Josiah
 
-string my_stat(unsigned int addr) {
+string my_stat(unsigned int addr, string name) {
 /* Need to return every bit of metadata about the file.
 The permission bits
 The number of references pointing to the file
@@ -324,8 +324,7 @@ The name of the file
 	mdata += to_string(file.type) + ' ';
 
 	// Need to get the name of the file from directory now
-	dirEntry entry = directoryBlock[addr];
-	mdata += entry.filename;
+	mdata += name; // Use the name that was looked up in the parent directory
 
 	return mdata;
 }

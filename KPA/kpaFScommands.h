@@ -3,6 +3,7 @@
 #include <string>
 #include "iNode.h"
 #include "fdTable.h"
+#include "blocks.h" // Provides the blocks type used by the FS call declarations.
 
 using namespace std;
 

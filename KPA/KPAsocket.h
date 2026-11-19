@@ -3,7 +3,7 @@
 
 // Author: Josiah Winiecki
 
-#include "shellprogram/kpaTCP.h"
+#include "common.h" // Provides the filesystem-side kpaTCP class
 #include <string>
 
 // This suite of functions handles incoming communications between the Shell

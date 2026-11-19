@@ -15,12 +15,17 @@ void startTCP(string ip, int port) {
 string receiveCommand() {
 
 	// listen
-	basket char[4096];
+	char basket[4096];
+	int bytesRead = tcpSocket->commsRead(basket, sizeof(basket));
+
+	if (bytesRead < 0) {
+		return"";
+	}
 	tcpSocket->commsListen(basket, sizeof(basket));
 
 	// parse
 	// Explicit cast to our enum type for extra safety
-	SYS_CALL call = static_cast<SYS_CALL>basket[0];
+	SYS_CALL call = static_cast<SYS_CALL>(basket[0]); // // Read the call code from the first byte.
 
 	// Several things need to happen now.
 	// 1.	The char buffer must be parsed further to extract all args.
@@ -40,7 +45,7 @@ string receiveCommand() {
 	// <call> <credentials> [pwd] [args]
 
 	// For now,
-	string rc = basket;
+	string rc(basket, bytesRead); // Use exactly the bytes read.
 
 	// First, check if there are even pwd or args in the string.
 	if (rc.size() > 5) {
@@ -64,7 +69,7 @@ string receiveCommand() {
 		// This needs a filename, mode (file or dir), and path.
 		// called by Touch
 
-		rc = my_creat();
+		rc = string (1, -1); // TODO: Call my_creat when creation is implemented.
 		break;
 
 		case _OPEN:
