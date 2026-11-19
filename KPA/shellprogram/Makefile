@@ -17,5 +17,11 @@ shellmain.o:	shellmain.cpp
 shell:		$(SRCS)
 	g++ $(SRCS) -o shell
 
+servertest.o:		servertest.cpp
+	g++ $(CWFLAGS) -c servertest.cpp
+
+server:		servertest.o common.o
+	g++ servertest.o common.o  -o server
+
 clean:
 	rm -f *.o shell *.exe

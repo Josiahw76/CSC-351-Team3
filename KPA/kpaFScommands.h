@@ -69,4 +69,31 @@ string my_rewinddir(string pwd);
 // nbytes = -1 uses the inode's size. the called provides enough buffer space
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes = -1);
 
+// Return 1 when closed or -1 for an invalid or unused descriptor
+int my_close(fdTable &table, unsigned int fd);
+
+struct dirStream;
+
+// Write bytes though an open descriptor
+int my_write(fdTable &table, unsigned int fd, const char buffer[], int nbytes, blocks &dataBlocks);
+
+// Create a directory using the caller's owner ID's and permission mask.
+int my_mkdir(string name, string pwd, uint16_t userUID, uint16_t userGID, uint16_t mask, blocks &inodeBlocks, blocks &dataBlocks);
+
+// Add another name for an existing regular file.
+int my_link(string oldPath, string newPath, string pwd, blocks &dataBlocks);
+
+// Remove a file name and update its inode's link count.
+int my_unlink(fdTable &table, string path, string pwd, unsigned int userUID, unsigned int userGID, blocks &inodeBlocks, blocks &dataBlocks);
+
+// Remove a directory and its descendants.
+int my_rmdir(fdTable &table, string path, string pwd, unsigned int userUID, unsigned int userGID, blocks &inodeBlocks, blocks &dataBlocks);
+
+// Open, read, and close a directory stream.
+int my_opendir(string path, string pwd, dirStream &stream);
+int my_readdir(dirStream &stream, dirEntryType &entry);
+int my_closedir(dirStream &stream);
+
+// Save filesystem state and stop the request loop after saving succeeds.
+int my_kill(blocks &inodeBlocks, blocks &dataBlocks, fdTable &table, string pwd, FILE *store, bool &running);
 #endif

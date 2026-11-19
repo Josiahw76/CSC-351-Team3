@@ -8,11 +8,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-
-#include "kpa.h"
-#include "kpaFS.h"
-#include "kpaMisc.h"
-#include "kpaFSmgmt.h"
+#include "KPAsocket.h"
 #include "kpaFScommands.h"
 
 using namespace std;

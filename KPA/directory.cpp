@@ -89,6 +89,7 @@ unsigned int directory::iNodeInit(iNode &node, blocks *data) {
 
 //******************************************************************************
 
+// Author: Dylan P
 unsigned int directory::stringToChars(string src, char *dst) {
     unsigned rc = src.length() < 32;
     
@@ -113,6 +114,7 @@ directory::directory(blocks *nodes, blocks *data) {
 //******************************************************************************
 
 // Author: Dylan Poirier
+
 unsigned int directory::mkdir(string path) {
     unsigned int rc;
     

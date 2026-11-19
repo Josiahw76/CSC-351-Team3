@@ -48,11 +48,11 @@ class directory {
     public:
         directory(blocks *nodes, blocks *data);
         
-        unsigned int mkdir(std::string path, 
-                                  blocks *iNodes, blocks *dataBlocks);
+        unsigned int mkdir(std::string path);
            
        
 };
+
 
 //******************************************************************************
 

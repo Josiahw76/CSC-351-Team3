@@ -1,3 +1,5 @@
+// Author: Josiah W
+
 #include "common.h"
 #include <iostream>
 #include <sys/socket.h>
@@ -40,6 +42,26 @@ COMMAND strToCmd(string str) {
 		rc = SHUTDOWN;
 	} else if (str == "exit") {
 		rc = EXIT;
+	} else if (str == "rm") {
+		rc = RM;
+	} else if (str == "rmdir") {
+		rc = RMDIR;
+	} else if (str == "chmod") {
+		rc = CHMOD;
+	} else if (str == "chown") {
+		rc = CHOWN;
+	} else if (str == "setUIDGID") {
+		rc = SUGID;
+	} else if (str == "setUmask") {
+		rc = SUMASK;
+	} else if (str == "cp") {
+		rc = CP;
+	} else if (str == "mv") {
+		rc = MV;
+	} else if (str == "cat") {
+		rc = CAT;
+	} else if (str == "ln") {
+		rc = LN;
 	} else {
 		rc = UNKNOWN;
 	}
@@ -51,7 +73,11 @@ string getAckArgs(string ack) {
 	// A byte for return code, a space, then any content
 
 	// Return everything beyond the first two bytes of the string.
-	return ack.substr(2);
+	string rc = "";
+	if (ack.size() > 0) {
+		rc = ack.substr(2);
+	}
+	return rc;
 }
 
 void checkCode(string rc) {
@@ -63,7 +89,7 @@ void checkCode(string rc) {
 
 		case 0:
 		case -1:
-		printf("Generic failure\n");
+		// printf("Generic failure\n");
 		break;
 
 		// In any case where an operation failed due to lack of
@@ -72,9 +98,14 @@ void checkCode(string rc) {
 		printf("Permission denied.\n");
 		break;
 
+		// The given path was invalid somehow.
+		case -3:
+		printf("Error: invalid path");
+		break;
+
 		// Error code is not something we expected
 		default:
-			printf("Unknown error\n");
+		printf("Unknown error\n");
 	}
 
 }
@@ -96,6 +127,8 @@ string genCredentials() {
 //*****************************************************************************
 // 				KPATCP FUNCTIONS
 //*****************************************************************************
+
+// I (Josiah) did not write these, they were provided in the kpaTCP source.
 
 kpaTCP::kpaTCP(string serverIPaddress, int serverPort, bool serverFlag) {
     serverPortNumber = serverPort;

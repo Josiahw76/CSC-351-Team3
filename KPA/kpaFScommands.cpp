@@ -117,27 +117,28 @@ int findINodeInDirectory(const iNode &directory, const db blockPool [], string n
         
         for (unsigned int i = 0; i < indexPerBlock && entriesLeft > 0 && result == -1; i++) // Stop when match is found or entires run out
         {
-        const indexType *secondIndex = blockPool[firstIndex[i]].index; // Follow the address to. a second index block
-
-        for (unsigned int j = 0; j < indexPerBlock && entriesLeft > 0 && result == -1; j++) { // Search data blocks until match is found
+            const indexType *secondIndex = blockPool[firstIndex[i]].index; // Follow the address to. a second index block
             
-            const dirEntryType *entries = blockPool[secondIndex[j]].dirEntry; //View this data block as dir entries
+            for (unsigned int j = 0; j < indexPerBlock && entriesLeft > 0 && result == -1; j++) { // Search data blocks until match is found
+        
+                const dirEntryType *entries = blockPool[secondIndex[j]].dirEntry; //View this data block as dir entries
 
-            // The final block may contain fewer entries;
-            unsigned int count = entriesLeft; // Start with the number of entries still unchecked
-            if (count > dirEntryPerBlock) { // Check whether more than one block of entries are left
+                // The final block may contain fewer entries;
+                unsigned int count = entriesLeft; // Start with the number of entries still unchecked
+                if (count > dirEntryPerBlock) { // Check whether more than one block of entries are left
                 count = dirEntryPerBlock; // Limit the search to one block.
-            }
+                }
 
-            int position = findDirectoryEntry(entries, count, name); // Search the valid entries in the block
-            if (position != -1) { // Use the entry only when a matching name is found
-                result = entries[position].iNodeIndex; // Save its inode index so both loops stop
+                int position = findDirectoryEntry(entries, count, name); // Search the valid entries in the block
+                if (position != -1) { // Use the entry only when a matching name is found
+                    result = entries[position].iNodeIndex; // Save its inode index so both loops stop
+                }
+                
+                entriesLeft -= count; // remove the entries checked in this block
             }
-
-            entriesLeft -= count; // remove the entries checked in this block
         }
-    }
 
+    }
     return result; // return the matching inode index; or -1 when missing 
 }
 
@@ -270,7 +271,7 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
         // Limit the request to the bytes remaining in the file
         if (nbytes > remaining) { // check wheter request goes beyond EOF
-            nbytes = remaining // limit the request to the remaining bytes
+            nbytes = remaining; // limit the request to the remaining bytes
         }
 
         while (copied < nbytes) { // continue until the requested bytes have been copied
@@ -300,16 +301,7 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 // Author: Josiah
 
 string my_stat(unsigned int addr) {
-/* Need to return every bit of metadata about the file.
-The permission bits
-The number of references pointing to the file
-The name of the file owner
-The name of the permissions group
-The file size in bytes
-The last modified date
-The type of the iNode, either directory or file
-The name of the file
-	*/ 
+
 	// Get a copy of the iNode
 	iNode file = iNodePool[addr];
 
@@ -327,22 +319,6 @@ The name of the file
 	mdata += entry.filename;
 
 	return mdata;
-}
-
-string my_rewinddir(string pwd) { //return the parent of the shell's current path
-    if (pwd != "/") { // leave root unchanged
-        pwd = pwd.substr(0, pwd.find_last_of('/')); // remove the final slash and directory name
-
-        if (pwd.empty()) { //removing a root child's name leaves and empty string
-            pwd = "/"; // represent its parent as root
-        }
-    }
-
-    string reply (1, 1); // start with existing success status byte
-    reply += ' '; // Separate the status from the path
-    reply += pwd; // Add the parent path to the reply
-
-    return reply; // return the completed reply
 }
 
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor
@@ -378,7 +354,80 @@ int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // rea
     return result; //return the byte count or the saved error result
 }
 
-            
+// Author: Simeon K
 
-        // Passing fp by reference updates this open file's position
-        
+// Close an open file descriptor
+int my_close(fdTable &table, unsigned int fd) {
+    int result = -1; // Invalid or already closed desciprtor
+
+    // Check the index before accessing its entry.
+    if (fd < table.tableCapacity && table.openFiles[fd].fmode != 'n') {
+        // Release this descriptor slot for reuse.
+        table.closef(fd);
+        result = 1; // success
+    }
+
+    return result; // return result of the close attempt.
+}
+
+int my_write(fdTable &table, unsigned int fd, const char buffer[],
+             int nbytes, blocks &dataBlocks) {
+    // TODO: Check the descriptor and write mode.
+    // TODO: Write bytes, allocate blocks as needed, and update position/metadata.
+    return -1; // Not implemented.
+}
+
+int my_mkdir(string path, string pwd, uint16_t userUID, uint16_t userGID,
+             uint16_t mask, blocks &inodeBlocks, blocks &dataBlocks) {
+    // TODO: Find the parent and check the requested directory name.
+    // TODO: Initialize the new directory and add its name to the parent.
+    return -1; // Not implemented.
+}
+
+int my_link(string oldPath, string newPath, string pwd, blocks &dataBlocks) {
+    // TODO: Find the existing file and the new name's parent directory.
+    // TODO: Add the new name and update the inode's link count and metadata.
+    return -1; // Not implemented.
+}
+
+int my_unlink(fdTable &table, string path, string pwd, unsigned int userUID,
+              unsigned int userGID, blocks &inodeBlocks, blocks &dataBlocks) {
+    // TODO: Find the file and check the required permissions.
+    // TODO: Agree on handling an open file's final link.
+    // TODO: Remove the name, update links, and release storage when appropriate.
+    return -1; // Not implemented.
+}
+
+int my_rmdir(fdTable &table, string path, string pwd, unsigned int userUID,
+             unsigned int userGID, blocks &inodeBlocks, blocks &dataBlocks) {
+    // TODO: Find the directory, protect root, and check permissions.
+    // TODO: Remove descendants, then remove this directory and release storage.
+    return -1; // Not implemented.
+}
+
+int my_opendir(string path, string pwd, dirStream &stream) {
+    // TODO: Agree on the directory-stream fields and lifetime rules.
+    // TODO: Find the directory and initialize its reading position.
+    return -1; // Not implemented.
+}
+
+int my_readdir(dirStream &stream, dirEntryType &entry) {
+    // TODO: Check the stream and copy the next directory entry.
+    // TODO: Advance its position and distinguish an entry, EOF, and failure.
+    return -1; // Not implemented.
+}
+
+int my_closedir(dirStream &stream) {
+    // TODO: Check the stream and release its open state.
+    return -1; // Not implemented.
+}
+
+int my_kill(blocks &inodeBlocks, blocks &dataBlocks, fdTable &table,
+            string pwd, FILE *store, bool &running) {
+    // TODO: Agree on a save format that matches the startup restore code.
+    // TODO: Save the pools, descriptor table, and current directory.
+    // TODO: Stop the request loop only after saving succeeds.
+    return -1; // Not implemented; leave running unchanged.
+}
+
+// END FS CALL TEMPLATEEE
