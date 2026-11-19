@@ -301,16 +301,6 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 // Author: Josiah
 
 string my_stat(unsigned int addr, string name) {
-/* Need to return every bit of metadata about the file.
-The permission bits
-The number of references pointing to the file
-The name of the file owner
-The name of the permissions group
-The file size in bytes
-The last modified date
-The type of the iNode, either directory or file
-The name of the file
-	*/ 
 	// Get a copy of the iNode
 	iNode file = iNodePool[addr];
 

@@ -45,7 +45,6 @@ enum SYS_CALL : uint8_t {
 	_OPENDIR,
 	_CLOSEDIR,
 	_READDIR,
-	_REWINDDIR,
 	_LS,
 	_KILL
 };
@@ -62,6 +61,16 @@ enum COMMAND : uint8_t {
 	LCPOUT,
 	SHUTDOWN,
 	EXIT,
+	RM,
+	RMDIR,
+	CHMOD,
+	CHOWN,
+	SUGID,
+	SUMASK,
+	CP,
+	MV,
+	CAT,
+	LN,
 	UNKNOWN
 };
 

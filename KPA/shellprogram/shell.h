@@ -22,7 +22,9 @@ using namespace std;
 // Global variables
 extern uint8_t uid, gid;
 extern string pwdStr;
-extern string args;
+extern string args_raw;
+extern string *args;
+extern unsigned int argCount;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 
@@ -37,13 +39,16 @@ extern string altArgs;
 // Helper function that handles communications between the shell and FS.
 //
 // operation is what to do, givePWD = true will provide pwdStr to FS,
-// and args are optional arguments that were given to the shell by the user.
-// some commands don't have args so the parameter is optional.
+// and args_raw are optional arguments that were given to the shell by the user.
+// some commands don't have args_raw so the parameter is optional.
 //
 // Handles message reception as well.
 // TODO:	auto print error messages if the first byte is an error code.
 // Maybe build in an error handler with a switch case for these?
-string issueCommand(SYS_CALL call, bool givePWD, bool useArgs, bool useAlts = false);
+string issueCommand(SYS_CALL call, string wd, bool useArgs, bool useAlts = false);
+
+// Prepares whatever argument was given 
+string prepPath(string filename, bool dumpArg = true);
 
 // Lists the contents of the current working directory within the FS
 //
@@ -53,7 +58,7 @@ void ls();
 
 // Changes the present working directory.
 //
-// Provides to the FS pwdStr and args.
+// Provides to the FS pwdStr and args_raw.
 void cd();
 
 // Creates a new directory within the current working directory in the FS
@@ -80,5 +85,29 @@ void Lcp();
 
 // Terminates the File System process and closes the Shell.
 void shutdown();
+
+// PHASE 2 COMMANDS
+
+void rm();
+
+void rmdir();
+
+void chmod();
+
+void chown();
+
+void setUIDGID();
+
+void setUmask();
+
+void cp();
+
+void mv();
+
+void cat();
+
+void ln();
+
+
 
 #endif

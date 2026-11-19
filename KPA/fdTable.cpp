@@ -23,7 +23,7 @@ fdTable::~fdTable() {
 //******************************************************************************
 
 unsigned int fdTable::add_entry(Entry file) {
-	unsigned int fd;
+	unsigned int fd = 0;
 
 	// Because of the way we use this table, it can literally never be
 	// full.

