@@ -24,7 +24,7 @@ class kpaTCP;
 // Global variables
 extern uint8_t uid, gid;
 extern string pwdStr;
-extern string args;
+extern string args_raw;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 

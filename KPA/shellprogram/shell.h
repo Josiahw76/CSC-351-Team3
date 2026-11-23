@@ -43,8 +43,6 @@ extern string altArgs;
 // some commands don't have args_raw so the parameter is optional.
 //
 // Handles message reception as well.
-// TODO:	auto print error messages if the first byte is an error code.
-// Maybe build in an error handler with a switch case for these?
 string issueCommand(SYS_CALL call, string wd, bool useArgs, bool useAlts = false);
 
 // Prepares whatever argument was given 
@@ -54,36 +52,48 @@ string prepPath(string filename, bool dumpArg = true);
 //
 // Makes a request for the contents of the directory that pwdStr points to.
 // The contents are placed on the output stream
+// UPDATED
 void ls();
 
 // Changes the present working directory.
 //
 // Provides to the FS pwdStr and args_raw.
+// UPDATED
 void cd();
 
 // Creates a new directory within the current working directory in the FS
+// UPDATED
 void mkdir();
 
 // Gives the current working directory
 // Does not communicate with FS: just prints pwdStr
+// UPDATED
 void pwd();
 
 // Returns metadata about a given file.
+// UPDATED
 void stat();
 
 // Creates a file using the given filename if it does not exist.
 // Otherwise updates modified and access times.
+
+// UPDATED: now accepts any number of arguments
 void touch();
 
 // Copies a file from the host OS into the FS
 // Also known as LCPIN
+
+// UPDATED
 void lcp();
 
 // Copies a file out of the FS into the host OS
 // Also known as LCPOUT
+
+// UPDATED: may need revision
 void Lcp();
 
 // Terminates the File System process and closes the Shell.
+// IMPROVED
 void shutdown();
 
 // PHASE 2 COMMANDS

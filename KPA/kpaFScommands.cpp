@@ -319,6 +319,7 @@ string my_stat(unsigned int addr, string name) {
 	return mdata;
 }
 
+/* DEPRECATED
 string my_rewinddir(string pwd) { //return the parent of the shell's current path
     if (pwd != "/") { // leave root unchanged
         pwd = pwd.substr(0, pwd.find_last_of('/')); // remove the final slash and directory name
@@ -334,6 +335,7 @@ string my_rewinddir(string pwd) { //return the parent of the shell's current pat
 
     return reply; // return the completed reply
 }
+*/
 
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor
 
@@ -372,7 +374,7 @@ int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // rea
 
 // Close an open file descriptor
 int my_close(fdTable &table, unsigned int fd) {
-    int result = -1; // Invalid or already closed desciprtor
+    int result = -1; // Invalid or already closed descriptor
 
     // Check the index before accessing its entry.
     if (fd < table.tableCapacity && table.openFiles[fd].fmode != 'n') {

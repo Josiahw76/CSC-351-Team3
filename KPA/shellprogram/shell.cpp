@@ -108,7 +108,7 @@ string prepPath(string filename, bool dumpArg) {
 			bs_pos = path.find_last_of('/') + 1;
 
 			// Grab everything from after the bs to the end of str
-			filename = substr(bs_pos);
+			filename = path.substr(bs_pos);
 
 			// Strip the end off including the '/'
 			path.erase(bs_pos - 1);
@@ -178,45 +178,49 @@ void stat() {
 	if (argCount == 1) {
 		string wd = prepPath(args[0], false);
 		string rc = issueCommand(_STAT, wd, false, false);
+
+		// Cast first byte as int and check if it indicates success.
+		if ((uint8_t)rc[0] > 0) {
+		
+			// Data ready for parse
+			string data = getAckArgs(rc);
+
+			// Print it
+			printf("%s\n", data.c_str());
+		}
 	} else {
 		printf("Error: exactly one argument allowed for cd\n");
 		return;
 	}
 
-	// Cast first byte as int and check if it indicates success.
-	if ((int)rc[0] > 0) {
-		
-		// Data ready for parse
-		string data = getAckArgs(rc);
-
-		// Print it
-		printf("%s\n", data.c_str());
-	}
 }
 
 //******************************************************************************
 
 void touch() {
-	string rc;
-
+	string wd, rc;
 	// If the file exists, we want to update the access time fields
 	// If not, we want to create it.
 
 	// Pre-emptively acquire the first byte to write back.
-	altArgs = ;
-	rc = issueCommand(_READ, true, false, true);
 
-	// If this fails, the file doesn't exist
-	if ((int)rc[0] > 0) {
-		// Now put the byte back into the first position.
-		altArgs = getAckArgs(rc) + ' ' + 0;
-		rc = issueCommand(_WRITE, true, false, true);
+	for (unsigned int i = 0; i < argCount; i++) {
+		wd = prepPath(args[i]);
+		rc = issueCommand(_READ, wd, false, true);
 
-		altArgs.clear();
-	} else {
-		// I think a file name is sufficient for this sys call.
-		// Create is not mkdir, so yes.
-		string rc = issueCommand(_CREAT, true, true);
+		// If this fails, the file doesn't exist
+		if ((uint8_t)rc[0] > 0) {
+			// Now put the byte back into the first position.
+			altArgs = getAckArgs(rc);
+			altArgs += " 0";
+			rc = issueCommand(_WRITE, wd, false, true);
+
+			altArgs.clear();
+		} else {
+			// I think a file name is sufficient for this sys call.
+			// Create is not mkdir, so yes.
+			string rc = issueCommand(_CREAT, wd, false, true);
+		}
 	}
 }
 
@@ -224,93 +228,132 @@ void touch() {
 
 // Tells the FS to save and shut down
 void shutdown() {
-	string rc = issueCommand(_KILL, false, false);
+	char buf[1];
+	buf[0] = _KILL;
+	tcpSocket->commsWrite(buf, 1);
 }
 
 //******************************************************************************
 
+// TODO: change send behavior so only 4KB is sent over tcp at a time.
+// in other words, break up messages if file is very large
+
 // LCPIN
 void lcp() {
-	// Gotta parse the args_raw here...
+	// The arguments are treated as:
 	// <source> <dest>
-	size_t pos = args_raw.find_first_of(' ');
-	string fname = args_raw.substr(0, pos);
-	FILE *file = fopen(fname.c_str(), "r");
-	if (file) {
-		// Make sure it's reading from the beginning of the file
-		rewind(file);
+	// size_t pos = args_raw.find_first_of(' ');
+	// string fname = args_raw.substr(0, pos);
+	//
+	// fname is effectively just args[0]
+	if (argCount == 2) {
 
-		// Get the file size
-		unsigned int size = ftell(file);
-		char *buffer = new char[size];
+	FILE *file = fopen(args[0].c_str(), "r");
+		if (file) {
+			// Make sure it's reading from the beginning of the file
+			rewind(file);
 
-		// Dump the file into the buffer
-		fread(buffer, 1, size, file);
+			// Get the file size
+			unsigned int size = ftell(file);
+			char *buffer = new char[size];
 
-		// Now touch filename to make sure it exists
-		// First, args_raw must be modified to only include filename.
-		args_raw = args_raw.substr(pos + 1, string::npos);
-		touch();
+			// Dump the file into the buffer as last file operation
+			fread(buffer, 1, size, file);
+			fclose(file);
+		
+			// Now touch filename to make sure it exists
+			// The target file should have been stored in args[1]
+			args_raw = args[1];
 
-		// Add the file contents to args_raw
-		args_raw += buffer;
-		issueCommand(_WRITE, true, true);
+			// Set argCount to what touch will expect.
+			argCount = 1;
+			touch();
 
-		fclose(file);
+			string wd = prepPath(args[1]);
+
+			// Use altArgs for filename and contents.
+			// It's used for touch but prepPath clears it.
+			altArgs += ' ';
+			altArgs += buffer;
+	
+			issueCommand(_WRITE, wd, false, true);
+
+		} else {
+			// file didn't work
+			printf("Error: file could not be opened\n");
+		} 
+	} else {
+		// argcount wasn't 2. exactly 2 are needed
+		printf("Error: 2 arguments required\n");
 	}
-
 }
 
 //******************************************************************************
 
 // LCPOUT
 void Lcp() {
+	/* 
 	// Get the separator
 	size_t pos = args_raw.find_first_of(' ');
 	// Get the host filename
 	string fname = args_raw.substr(pos + 1, string::npos);
-	// Open host file
-	FILE *file = fopen(fname.c_str(), "w");
+	*/
+	// Everything above is just grabbing args[1]
 
-	// Prep the args_raw for read operation
-	// fd, buffer, nbytes
+	if (argCount == 2) {
+		// Open host file
+		FILE *file = fopen(args[1].c_str(), "w");
 
-	// Get filename of FS file
-	args_raw = args_raw.substr(0, pos);
+		// Prep the args_raw for read operation
+		// fd, buffer, nbytes
 
-	// We can't do buffer here and we don't know how many
-	// bytes to put for nbytes, so default value there is the 
-	// entire length of the file, meaning all bytes
-	string rc = issueCommand(_READ, true, true);
-	if (!((int)rc[0] < 0)) {
-		// Write rc.size() number of 1 byte items from rc to file.
-		fwrite(rc.c_str(), 1, rc.size(), file);
+		/*
+		// Get filename of FS file
+		args_raw = args_raw.substr(0, pos);
+		*/
+		// This above is just grabbing args[0]
+
+		string wd = prepPath(args[0]);
+
+		// We can't do buffer here and we don't know how many
+		// bytes to put for nbytes, so default value there is the 
+		// entire length of the file, meaning all bytes
+		string rc = issueCommand(_READ, wd, false, true);
+		if (((uint8_t)rc[0] > 0)) {
+			// Lop off the return code and following blank before
+			// writing to the file.
+			rc.erase(0, 2);
+
+			// Write rc.size() number of 1 byte items to file	
+			fwrite(rc.c_str(), 1, rc.size(), file);
+			fclose(file);
+		}
+	} else {
+		printf("Error: 2 arguments required\n");
 	}
-	fclose(file);
+	
 }
 
 //******************************************************************************
 // PHASE 2 COMMANDS
 
-void rm() {
+void rm() {}
 
-}
+void rmdir() {}
 
-void rmdir();
+void chmod() {}
 
-void chmod();
+void chown() {}
 
-void chown();
+void setUIDGID() {}
 
-void setUIDGID();
+void setUmask() {}
 
-void setUmask();
+void cp() {}
 
-void cp();
+void mv() {}
 
-void mv();
+void cat() {}
 
-void cat();
-
-void ln();
+void ln() {}
 

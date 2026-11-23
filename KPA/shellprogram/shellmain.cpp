@@ -19,10 +19,11 @@
 #define LOCALHOST "127.0.0.1"
 kpaTCP *tcpSocket;
 string args_raw = "";
-string args[32];
 string credentials;
 string pwdStr;
 string altArgs;
+string *args;
+
 
 unsigned int argCount;
 
@@ -35,6 +36,7 @@ using namespace std;
 int main(/*int argc, char *argv[]*/) {
 
 	// INIT PHASE
+	args = new string[32];
 
 	credentials = genCredentials();
 
@@ -64,6 +66,9 @@ int main(/*int argc, char *argv[]*/) {
 		command.clear();
 		i = 0;
 		args_raw.clear();
+
+		// Print the idle prompt
+		printf("%s> ",pwdStr.c_str());
 
 		// Fetch input from the stream
 		getline(cin, input);
