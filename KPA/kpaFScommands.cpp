@@ -6,31 +6,6 @@
 //******************************************************************************
 
 // Author: Simeon K
-
-bool parseCreateArgs(string requestArgs, string &name){
-    name.clear(); // Remove the name from an earlier request.
-    bool valid = true; // start with valid until a check fails
-
-    // Reject a missing file name or one containing only spaces.
-    if (requestArgs.empty() || requestArgs.find_first_not_of(' ') == string::npos)
-    {
-        valid = false; //request failed
-    }
-
-    // The directory is passed seperately
-    //Reject a slash or a name too long for the directory entry.
-    if (requestArgs.find('/') != string::npos || requestArgs.size() >= fnameMaxSize) { 
-        valid = false; // request failed
-    }
-
-    // Continue only when the earlier checks passed
-    if (valid) {
-    name = requestArgs; // Copy the  filename to the output
-    }
-
-    return valid;
-}
-
 //******************************************************************************
 
 // Author: Simeon K
@@ -187,80 +162,6 @@ int findDirectoryByPath(string path, const iNode iNodePool[], const db blockPool
     return current; // Return the directory's iNode index or -1 on failure.
 }
 
-// check a directory change and build its reply
-string my_chdir(string path, string pwd) {
-    // Invalid path replies keep the shell's existing pwd
-    string reply(1, -3); //Start with existing one-byte invalid-path status
-    reply += ' '; // seperate the status from the path
-    reply += pwd; // preserve the original pwd if the change fails
-
-    bool valid = !path.empty(); // Reject an empty requested path
-    // Absolute paths start at root; relative paths start at pwd
-    int current = 0; // start absolute path at the root inode
-    string target = "/"; // start the absolute target path at the root
-
-    
-    if (valid){ // Check the starting directory only when a path is supplied
-        if (path[0] != '/') { //A path without a leading slash is relative
-            target = pwd; // start a relative path at the current directory
-
-            while (target.size() > 1 && target.back() == '/') { //remove trailing slashes while preserving root
-            target.pop_back(); //remove one trailing slash
-            }
-            
-            current = findDirectoryByPath(target, iNodePool, blockPool); // find the starting directory's inode
-        }
-
-        if (current == -1 || iNodePool[current].type != DIR) { // Check the index before accessing the inode
-            valid = false; // starting directory is invalid
-        }
-    }
-
-    if (valid) { // Search the requested path only from a valid directory
-        // Split the requested path into directory names
-        queue<string> names; // store directory names in their path order
-        string::size_type start = 0; // start splitting at the start of the path
-
-        while (start < path.size()) { // continue until the whole path has been split
-            string::size_type end = path.find ('/', start); // find the next slash
-
-            if (end == string::npos) { // handle the last name when no slash follows it
-                end = path.size(); // end of the string is used as boundary
-            }
-            if (end > start) { // skip empty pieces between slashes
-                names.push(path.substr(start, end - start)); //save this directory
-            }
-            start = end + 1; // move past the slash to the next name
-        }
-        
-        // Search from the selected starting iNode
-        while (!names.empty()) { // stop after the last name or a failed lookup
-            string name = names.front(); // get the next directory name
-            names.pop(); // remove that name from the queue
-
-            int next = findINodeInDirectory(iNodePool[current], blockPool, name); //search the current directory
-            
-            if (next == -1 || iNodePool[next].type != DIR) { // Reject a missing name or a regular file
-                valid = false; // failure so traverse stops
-            } else {
-                current = next; // move to the directory that was found
-                if (target != "/") { //root supplies the first slash
-                target += '/'; // seperate this name from the existing path
-                }
-                target += name; // append the directory name that was found
-            }
-        }
-    }
-    
-    if (valid) { // replace the faillure reply only after the whole path succeeds
-        reply = string (1, 1); // set the existing one-byte success status
-        reply += ' '; // seperate the status from the path
-        reply += target; // include the completed directory path
-    }
-
-    return reply; //return the completed status and path reply.
-}
-
 uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t nbytes) { //copy bytes and advance the file position
     // Record when this read was performed
     node.aTime = time(NULL); // record this read, including a zero byte or EOF read
@@ -319,24 +220,6 @@ string my_stat(unsigned int addr, string name) {
 	return mdata;
 }
 
-/* DEPRECATED
-string my_rewinddir(string pwd) { //return the parent of the shell's current path
-    if (pwd != "/") { // leave root unchanged
-        pwd = pwd.substr(0, pwd.find_last_of('/')); // remove the final slash and directory name
-
-        if (pwd.empty()) { //removing a root child's name leaves and empty string
-            pwd = "/"; // represent its parent as root
-        }
-    }
-
-    string reply (1, 1); // start with existing success status byte
-    reply += ' '; // Separate the status from the path
-    reply += pwd; // Add the parent path to the reply
-
-    return reply; // return the completed reply
-}
-*/
-
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor
 
     int result = -1; // keep the invalid input result unless the read succeeds
@@ -374,7 +257,7 @@ int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // rea
 
 // Close an open file descriptor
 int my_close(fdTable &table, unsigned int fd) {
-    int result = -1; // Invalid or already closed descriptor
+    int result = -1; // Invalid or already closed desciprtor
 
     // Check the index before accessing its entry.
     if (fd < table.tableCapacity && table.openFiles[fd].fmode != 'n') {
