@@ -39,13 +39,6 @@ string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 	if (useArgs) {
 		msg += ' ' + args_raw;
 
-	// Otherwise, if args_raw has anything in it, check if it isn't whitespace.
-	// If non-blank characters follow something that doesn't take arguments,
-	// cancel the operation.
-	} else if ((argCount > 0) && (args_raw.find_first_not_of(' ') != string::npos)) {
-		printf("Error: Unexpected arguments\n");
-		doWrite = false;
-
 	// This is for chained system calls. The functions below use these
 	// occasionally for very specific behaviors
 	} else if (useAlts) {
@@ -116,6 +109,8 @@ string prepPath(string filename, bool dumpArg) {
 			altArgs = filename;
 	}
 
+	printf("extracted wd is %s\n",path.c_str());
+	printf("altArgs is %s\n",altArgs.c_str());
 	return path;
 }
 
@@ -141,16 +136,65 @@ void ls() {
 
 //******************************************************************************
 
+// TODO: stat every file along the path and change pwdStr if no errors
+// 1: check that a single argument has been provided
+// 2: Enter iteration until there are no more '/' to parse (do while)
+// 3: Each iteration, parse out the filename using substr and stat it
+// 3.1: if it has "..", we know it exists, so skip the stat
 void cd() {
-	string rc;
+	string fname, wd, rc;
+	size_t bs_pos;
+	bool pathExists = true;
 
-	if (argCount == 0) {
-		string wd = prepPath(args[0], false);
-		rc = issueCommand(_CHDIR, wd, false, false);
-		pwdStr = getAckArgs(rc);
+	if (argCount == 1) {
+		wd = pwdStr;
+		// Body of the loop
+		do {
+			if (args[0].empty()) {
+				break;
+			}
+			// Now we have the first position of the second arg and
+			// information about the path length
+			bs_pos = args[0].find_first_of('/');
+			fname = args[0].substr(0, bs_pos);
+
+			// Take off the section that we assigned to fname,
+			// including the '/'
+			args[0].erase(0, bs_pos + 1);
+
+			if (/* fname is "..". skip for now */ false) {
+				// Skip the stat, erase last on path
+				bs_pos = wd.find_last_of('/');
+				if (bs_pos != 0) {
+					// make sure path isn't root
+					wd.erase(bs_pos, string::npos);
+				}
+
+			} else {
+				// Stat the file to make sure it exists
+				wd.append(1, '/');
+				wd.append(fname);
+				// Send as a full path
+				rc = issueCommand(_STAT, wd, false, false);
+				if (rc[0] > 0) {
+					pathExists = false;
+					break;
+				}
+			} 
+		} while (true);
+
+		// Finally, take action as to whether the path was valid
+		if (pathExists) {
+			pwdStr = wd;
+		} else {
+			printf("Error: file \"%s\" does not exist\n", 
+					fname.c_str());
+		}
+
 	} else {
 		printf("Error: exactly one argument allowed for cd\n");
 	}
+
 }
 
 //******************************************************************************
@@ -161,7 +205,6 @@ void mkdir() {
 		wd = prepPath(args[i]);
 		string rc = issueCommand(_MKDIR, wd, false, true);
 	}
-
 }
 
 //******************************************************************************

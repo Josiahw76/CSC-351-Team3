@@ -96,34 +96,35 @@ int main(/*int argc, char *argv[]*/) {
 			// Get everything after the command
 			args_raw = input.substr(command.length(), input.size());
 
-			// Trim whitespace from the args_raw
+			// Trim whitespace from args_raw
 			trimLR(args_raw);
 
 			// PHASE 2: SEPARATE ARG STRINGS INTO ARRAY
 
 			if (!args_raw.empty()) {
-				size_t l_pos, i = 0;
-				size_t r_pos;
+				size_t r_pos, i = 0;
+
+				//printf("args_raw contains %s\n",args_raw.c_str());
 
 				while (true) {
 				    r_pos = args_raw.find_first_of(' ');
-				    args[i] = args_raw.substr(l_pos, r_pos);
+				    args[i] = args_raw.substr(0, r_pos);
+				    //printf("Arg is \"%s\"\n",args[i].c_str());
+
 				    i++;
+				    args_raw.erase(0, r_pos + 1);
 
-				    l_pos = r_pos + 1;
-
-				    // Check if our index exceeds the bounds
-				    if (l_pos > args_raw.size()) {
-				        break;
+				    if (r_pos == string::npos) {
+					    break;
 				    }
 
-				    // 32+ args is just absurd, but 32 is ok
+				    // Limit number of arguments
 				    if (i > 31) {
 				        printf("Error: too many arguments\n");
 					break;
 				    }
 				}
-				argCount = i + 1; // convert to count value
+				argCount = i;
 			}
 
 		} else {

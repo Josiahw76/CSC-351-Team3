@@ -55,10 +55,7 @@ string prepPath(string filename, bool dumpArg = true);
 // UPDATED
 void ls();
 
-// Changes the present working directory.
-//
-// Provides to the FS pwdStr and args_raw.
-// UPDATED
+// Verifies files along the path with STAT, assigns pwdStr if valid
 void cd();
 
 // Creates a new directory within the current working directory in the FS
@@ -70,7 +67,7 @@ void mkdir();
 // UPDATED
 void pwd();
 
-// Returns metadata about a given file.
+// Asks the FS for metadata about a given file.
 // UPDATED
 void stat();
 
