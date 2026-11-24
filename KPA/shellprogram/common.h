@@ -38,14 +38,15 @@ enum SYS_CALL : uint8_t {
 	_STAT,
 	_FSTAT,
 	_MKDIR,
+	_RM,
 	_RMDIR,
 	_LINK,
 	_UNLINK,
-	_CHDIR,
+	_CHMOD,
+	_CHOWN,
 	_OPENDIR,
 	_CLOSEDIR,
 	_READDIR,
-	_LS,
 	_KILL
 };
 

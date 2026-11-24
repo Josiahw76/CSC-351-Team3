@@ -300,7 +300,10 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
 // Author: Josiah
 
-string my_stat(unsigned int addr, string name) {
+string my_stat(/* unsigned int addr, string name */) {
+	// TODO: need to get the parameters from other functions and globals
+
+
 	// Get a copy of the iNode
 	iNode file = iNodePool[addr];
 
@@ -318,24 +321,6 @@ string my_stat(unsigned int addr, string name) {
 
 	return mdata;
 }
-
-/* DEPRECATED
-string my_rewinddir(string pwd) { //return the parent of the shell's current path
-    if (pwd != "/") { // leave root unchanged
-        pwd = pwd.substr(0, pwd.find_last_of('/')); // remove the final slash and directory name
-
-        if (pwd.empty()) { //removing a root child's name leaves and empty string
-            pwd = "/"; // represent its parent as root
-        }
-    }
-
-    string reply (1, 1); // start with existing success status byte
-    reply += ' '; // Separate the status from the path
-    reply += pwd; // Add the parent path to the reply
-
-    return reply; // return the completed reply
-}
-*/
 
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor
 
@@ -445,5 +430,11 @@ int my_kill(blocks &inodeBlocks, blocks &dataBlocks, fdTable &table,
     // TODO: Stop the request loop only after saving succeeds.
     return -1; // Not implemented; leave running unchanged.
 }
+
+// TODO: add the following:
+// my_rm() {}
+// my_chmod() {}
+// my_chown() {}
+//
 
 // END FS CALL TEMPLATEEE

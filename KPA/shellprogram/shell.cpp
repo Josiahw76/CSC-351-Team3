@@ -232,7 +232,6 @@ void stat() {
 			printf("%s\n", data.c_str());
 		}
 	} else {
-		printf("Error: exactly one argument allowed for cd\n");
 		return;
 	}
 

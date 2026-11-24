@@ -68,28 +68,23 @@ string receiveCommand() {
 		// This needs a filename, mode (file or dir), and path.
 		// called by Touch
 
-		rc = string (1, -1); // TODO: Call my_creat when creation is implemented.
-		break;
-
-		case _OPEN:
-		// Used by touch
-		rc = open()
+		rc = my_create();
 		break;
 
 		case _READ:
 		// touch uses this to get a byte to write back to the file
 
-		rc = read();
+		rc = my_read();
 		break;
 
 		case _WRITE:
 		// touch uses this to trigger modified time.
 
-		rc = write();
+		rc = my_write();
 		break;
 
 		case _STAT:
-		// Called by stat
+		// Called by stat and many other shell functions
 
 		rc = my_stat();
 		break;
@@ -97,29 +92,37 @@ string receiveCommand() {
 		case _MKDIR:
 		// Called by mkdir
 
-		rc = mkdir();
+		rc = my_mkdir();
 		break;
 
+		case _RM:
+		// Called by RM
+		
+		rc = my_rm();
 		case _RMDIR:
 		// Called by rmdir. recursive delete
 
-		rc = rmdir();
+		rc = my_rmdir();
 		break;
 
-		case _CHDIR:
-		// Called by CD
-	
-		rc = chdir();
+		case _CHMOD:
+
+		rc = my_chmod();
 		break;
 
-		case _REWINDDIR:
-		// Called by CD
-		rc = rewinddir();
+		case _CHOWN:
+
+		rc = my_chown();
+		break;
+
+		case _LINK:
+
+		rc = my_link();
 		break;
 
 		case _KILL:
 		// Save the entire FS and break the while loop in main.
-		rc = kill();
+		rc = my_kill();
 		break;
 
 		default:
