@@ -88,6 +88,7 @@ void checkCode(string rc) {
 		break;
 
 		case 0:
+
 		case -1:
 		// printf("Generic failure\n");
 		break;
@@ -101,6 +102,10 @@ void checkCode(string rc) {
 		// The given path was invalid somehow.
 		case -3:
 		printf("Error: invalid path");
+		break;
+
+		case -4:
+		printf("Error: file does not exist\n");
 		break;
 
 		// Error code is not something we expected

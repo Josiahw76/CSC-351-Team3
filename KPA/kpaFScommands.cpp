@@ -203,22 +203,27 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
 string my_stat(/* unsigned int addr, string name */) {
 	// TODO: need to get the parameters from other functions and globals
+	// Also, this needs to verify whether the iNode is used
 
 
-	// Get a copy of the iNode
-	iNode file = iNodePool[addr];
+	if (/* The iNode is actually in use */)
+		// Get a copy of the iNode
+		iNode file = iNodePool[addr];
 
-	// Now append everything to the string
-	string mdata = formatPermissions(file.perms) + ' ';
-	mdata += to_string(file.nLinks) + ' ';
-	mdata += to_string(file.uid) + ' ';
-	mdata += to_string(file.gid) + ' ';
-	mdata += to_string(file.size) + ' ';
-	mdata += to_string(file.aTime) + ' ';
-	mdata += to_string(file.type) + ' ';
+		// Now append everything to the string
+		string mdata = formatPermissions(file.perms) + ' ';
+		mdata += to_string(file.nLinks) + ' ';
+		mdata += to_string(file.uid) + ' ';
+		mdata += to_string(file.gid) + ' ';
+		mdata += to_string(file.size) + ' ';
+		mdata += to_string(file.aTime) + ' ';
+		mdata += to_string(file.type) + ' ';
 
-	// Need to get the name of the file from directory now
-	mdata += name; // Use the name that was looked up in the parent directory
+		// Need to get the name of the file from directory now
+		mdata += name; // Use the name that was looked up in the parent directory
+	} else {
+		mdata = (char)-4;
+	}
 
 	return mdata;
 }

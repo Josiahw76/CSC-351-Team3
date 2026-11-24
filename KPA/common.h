@@ -22,9 +22,9 @@ using namespace std;
 class kpaTCP;
 
 // Global variables
-extern unsigned int uid, gid;
+extern uint8_t uid, gid;
 extern string pwdStr;
-extern string args;
+extern string args_raw;
 extern kpaTCP *tcpSocket;
 extern string credentials;
 
@@ -38,18 +38,19 @@ enum SYS_CALL : uint8_t {
 	_STAT,
 	_FSTAT,
 	_MKDIR,
+	_RM,
 	_RMDIR,
 	_LINK,
 	_UNLINK,
-	_CHDIR,
+	_CHMOD,
+	_CHOWN,
 	_OPENDIR,
 	_CLOSEDIR,
 	_READDIR,
-	_REWINDDIR,
-	_LS,
 	_KILL
 };
 
+// Used in shell main for switch case statement
 enum COMMAND : uint8_t {
 	LS,
 	CD,
@@ -61,6 +62,16 @@ enum COMMAND : uint8_t {
 	LCPOUT,
 	SHUTDOWN,
 	EXIT,
+	RM,
+	RMDIR,
+	CHMOD,
+	CHOWN,
+	SUGID,
+	SUMASK,
+	CP,
+	MV,
+	CAT,
+	LN,
 	UNKNOWN
 };
 

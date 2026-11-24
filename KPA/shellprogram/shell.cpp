@@ -379,7 +379,20 @@ void Lcp() {
 //******************************************************************************
 // PHASE 2 COMMANDS
 
-void rm() {}
+
+void rm() {
+	string wd;
+	for (unsigned int i = 0; i < argCount; i++) {
+		// Step 1: generate absolute path for the argument
+		wd = prepPath(args[i], false);
+
+		// Step 2: check if the filename is real
+		if (issueCommand(_STAT, wd, false, false) == 1) {
+
+			// Step 3: delete the file 
+			issueCommand(_RM, wd, false, false);
+		}
+}
 
 void rmdir() {}
 
