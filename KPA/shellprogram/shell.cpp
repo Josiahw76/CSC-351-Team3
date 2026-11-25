@@ -116,6 +116,44 @@ string prepPath(string filename, bool dumpArg) {
 
 //******************************************************************************
 
+// Function to parse out file size from stat string
+// needlessly complicated because position in the string is only
+// known by number of spaces, not number of characters
+
+unsigned int getSize(string stats) {
+	size_t l_pos, r_pos = stats.size();
+
+	for (unsigned int i = 7; i < 5; i++) {
+		// Move backwards in the string using blanks
+		r_pos = stats.find_last_of(' ', r_pos - 1);
+	}
+	// We've reached the space following the size value
+	// _size_ <-
+
+	// Now, set l_pos to the first byte of the size value
+	l_pos = stats.find_last_of(' ', r_pos - 1) + 1;
+	
+	// Convert r_pos to a value representing the length of size
+	// in bytes
+	r_pos = r_pos - l_pos;
+	char *size = stats.substr(l_pos, r_pos).c_str();
+
+	// Now that the size string is extracted, convert to unsigned int
+	unsigned int count, reconstructed_int;
+	count = reconstructed_int = 0;
+	char a;
+
+	// use ascii conversion to turn size into integer
+	while ((a = size[count]) != '\0') {
+		reconstructed_int *= 10;
+		reconstructed_int += a - '0';
+		count++;
+	}
+	return reconstructed_int;
+}
+
+//******************************************************************************
+
 void ls() {
 	// PHASE 2 UPDATES: CHECKS FOR PATH
 	string wd;
@@ -386,25 +424,74 @@ void rm() {
 		// Step 1: generate absolute path for the argument
 		wd = prepPath(args[i], false);
 
-		// Step 2: check if the filename is real
-		if (issueCommand(_STAT, wd, false, false) == 1) {
+		// Step 2: check if the filename corresponds to a file
+		if (issueCommand(_STAT, wd, false, false)[0] == 1) {
 
 			// Step 3: delete the file 
 			issueCommand(_RM, wd, false, false);
 		}
 }
 
-void rmdir() {}
+void rmdir() {
+	string wd;
+	for (unsigned int i = 0; i < argCount; i++) {
+		// Step 1: generate absolute path for the argument
+		wd = prepPath(args[i], false);
 
-void chmod() {}
+		// Step 2: check if the filename corresponds to a directory
+		if (issueCommand(_STAT, wd, false, false)[0] == 2) {
 
-void chown() {}
+			// Step 3: delete the directory.
+			// File system should handle recursive deletion 
+			issueCommand(_RMDIR, wd, false, false);
+		}
+}
+
+void chmod() {
+	altArgs = args[0]; // load the uid:gid into altArgs
+	string wd;
+	for (unsigned int i = 1; i < argCount; i++) {
+		// Start at 1 because arg[0] is permission bits
+		if (issueCommand(_STAT, wd, false, false)[0] > 0) {
+			issueCommand(_CHMOD, wd, false, true);
+		}
+	}
+}
+
+void chown() {
+	altArgs = args[0];
+	string wd;
+	for (unsigned int i = 1; i < argCount; i++) {
+		if (issueCommand(_STAT, wd, false, false)[0] > 0) {
+			issueCommand(_CHOWN, wd, false, true);
+		}
+	}
+
+}
 
 void setUIDGID() {}
 
 void setUmask() {}
 
-void cp() {}
+
+// TODO: complete this function
+void cp() {
+	if (argCount > 2) {
+		string dest = prepPath(args[argCount - 1], false);
+		string rc = issueCommand(_STAT, dest, false, false);
+		if (rc[0] == 2) {
+			string wd;
+			unsigned int size;
+			for (i = 0; i < argCount - 1; i++) {
+				wd = prepPath(args[i]);
+				rc = issueCommand(_STAT, wd, false, false);
+				size = getSize();
+
+				// request size number of bytes from the file
+				altArgs = size;
+			}
+		}
+}
 
 void mv() {}
 
