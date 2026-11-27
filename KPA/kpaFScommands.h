@@ -31,10 +31,11 @@ typedef union db {
 } db;
 
 // Search an initialized directory; return the matching inode index or -1.
-int findINodeInDirectory(const iNode &directory, const db blockPool[], string name);
+int findINodeInDirectory(unsigned int directoryIndex, string name);
+
 
 // Find the directory inode for the shell's absolute pwd and -1 means failure
-int findDirectoryByPath(string path, const iNode iNodePool[], const db blockPool[]);
+int findDirectoryByPath(string path);
 
 // Search entryCount valid entries, rerun the position or -1
 int findDirectoryEntry(const dirEntryType entries[], unsigned int entryCount, string name);

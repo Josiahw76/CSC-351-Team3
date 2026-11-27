@@ -80,50 +80,36 @@ int findDirectoryEntry(const dirEntryType entries[], unsigned int entryCount, st
 }
 
 // Search a directory for a filename
-int findINodeInDirectory(const iNode &directory, const db blockPool [], string name) {
+int findINodeInDirectory(unsigned int directoryIndex, string name) {
+    int result = -1; // keep -1 until an entry matches
 
-    int result = -1; // Keep -1 unless the operation finds a different result
+    if (iNodePool[directoryIndex].type == DIR) {
+        fdTable table; // use a temporary descriptor for this lookup.
+        unsigned int fd = table.openf(directoryIndex, 'r'); // Open by inode
+        dirEntryType entry = {};
+        char *bytes = reinterpret_cast<char *>(&entry); // Read into the record
+        int entrySize = sizeof entry;
 
-    unsigned int entriesLeft = directory.size / sizeof(dirEntryType); // count the valid dir entries from its byte size
-
-    // An empty directory has no entries or data blocks to follow.
-    if (entriesLeft > 0) { // Only nonempty directories have data blocks to search  
-        const indexType *firstIndex = blockPool[directory.addr].index; // First level of block addresses
-        
-        for (unsigned int i = 0; i < indexPerBlock && entriesLeft > 0 && result == -1; i++) // Stop when match is found or entires run out
-        {
-            const indexType *secondIndex = blockPool[firstIndex[i]].index; // Follow the address to. a second index block
-            
-            for (unsigned int j = 0; j < indexPerBlock && entriesLeft > 0 && result == -1; j++) { // Search data blocks until match is found
-        
-                const dirEntryType *entries = blockPool[secondIndex[j]].dirEntry; //View this data block as dir entries
-
-                // The final block may contain fewer entries;
-                unsigned int count = entriesLeft; // Start with the number of entries still unchecked
-                if (count > dirEntryPerBlock) { // Check whether more than one block of entries are left
-                count = dirEntryPerBlock; // Limit the search to one block.
-                }
-
-                int position = findDirectoryEntry(entries, count, name); // Search the valid entries in the block
-                if (position != -1) { // Use the entry only when a matching name is found
-                    result = entries[position].iNodeIndex; // Save its inode index so both loops stop
-                }
-                
-                entriesLeft -= count; // remove the entries checked in this block
+        // Read one complete entry at a time and my_read advances the position.
+        while (result == -1 && my_read(table, fd, bytes, entrySize) == entrySize) {
+            if (name == entry.fname) {
+                result = entry.iNodeIndex;
             }
         }
 
+        my_close(table, fd); // Release it on match, EOF, or read error
     }
-    return result; // return the matching inode index; or -1 when missing 
+
+    return result;
 }
 
 //****
 // Author: Simeon K
 
 // Find a directory using an absolute path
-int findDirectoryByPath(string path, const iNode iNodePool[], const db blockPool[]) {
+int findDirectoryByPath(string path) {
    
-    int current = -1; // Keep -1 until a valid directory is found
+    int current = -1; // Keep -1 until a valid directory is found.
 
     // splitting the path
     if (!path.empty() && path[0] == '/' && iNodePool[0].type == DIR) { // Requires an absolute path and a directory at root
@@ -148,7 +134,7 @@ int findDirectoryByPath(string path, const iNode iNodePool[], const db blockPool
         // Every absolute path starts at the inode root.
         current = 0; // begin at the inode root
         while (!names.empty() && current != -1) { //stop after the last name or a failed lookup
-            int next = findINodeInDirectory(iNodePool[current], blockPool, names.front()); // look next name
+            int next = findINodeInDirectory(current, names.front()); // look next name
 
             if (next != -1 && iNodePool[next].type == DIR) { // check the index before accessing the inode
                 current = next; // move to the dir that was found
@@ -242,7 +228,7 @@ int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // rea
             } else {
                 iNode &node = iNodePool[file.fileAddress]; // access the files inode
 
-                if(node.type == FILE_TYPE) { // read file data only from a regular file
+                if (node.type == FILE_TYPE || node.type == DIR) { // read bytes from a file or directory
                     uint32_t count = node.size; //use the inode size when nbytes was omitted
                     
                     
