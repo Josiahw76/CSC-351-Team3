@@ -187,31 +187,21 @@ uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t n
 
 // Author: Josiah
 
-string my_stat(/* unsigned int addr, string name */) {
-	// TODO: need to get the parameters from other functions and globals
-	// Also, this needs to verify whether the iNode is used
+string my_stat(unsigned int addr, string name) {
+    // The caller has already checked that this inode is allocated.
+    iNode file = iNodePool[addr];
 
+    // Format the metadata in the current field order.
+    string mdata = formatPermissions(file.perms) + ' ';
+    mdata += to_string(file.nLinks) + ' ';
+    mdata += to_string(file.uid) + ' ';
+    mdata += to_string(file.gid) + ' ';
+    mdata += to_string(file.size) + ' ';
+    mdata += to_string(file.aTime) + ' ';
+    mdata += to_string(file.type) + ' ';
 
-	if (/* The iNode is actually in use */)
-		// Get a copy of the iNode
-		iNode file = iNodePool[addr];
-
-		// Now append everything to the string
-		string mdata = formatPermissions(file.perms) + ' ';
-		mdata += to_string(file.nLinks) + ' ';
-		mdata += to_string(file.uid) + ' ';
-		mdata += to_string(file.gid) + ' ';
-		mdata += to_string(file.size) + ' ';
-		mdata += to_string(file.aTime) + ' ';
-		mdata += to_string(file.type) + ' ';
-
-		// Need to get the name of the file from directory now
-		mdata += name; // Use the name that was looked up in the parent directory
-	} else {
-		mdata = (char)-4;
-	}
-
-	return mdata;
+    mdata += name; // Use the name the caller looked up.
+    return mdata;
 }
 
 int my_read(fdTable &table, unsigned int fd, char buffer[], int nbytes) { // read using an open file descriptor
