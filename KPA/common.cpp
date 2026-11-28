@@ -11,7 +11,7 @@
 // Common definitions for shell and FS
 // Things like SYS_CALL enumerations and formatting helper functions, as well
 // as the kpaTCP class.
-// 
+//
 // Simply include common.h to use
 
 using namespace std;
@@ -74,22 +74,23 @@ string getAckArgs(string ack) {
 
 	// Return everything beyond the first two bytes of the string.
 	string rc = "";
-	if (ack.size() > 0) {
+	if (ack.size() >= 2) {
 		rc = ack.substr(2);
 	}
 	return rc;
 }
 
 void checkCode(string rc) {
-	// Interpret the first byte as an int and 
+	// Interpret the first byte as an int and
 	switch ((int)rc[0]) {
+		case 2: // stat found a directory.
 		case 1:
 		// This is the default success code so simply break.
 		break;
 
 		case 0:
 		case -1:
-		// printf("Generic failure\n");
+		printf("Filesystem request failed.\n");
 		break;
 
 		// In any case where an operation failed due to lack of
@@ -100,21 +101,24 @@ void checkCode(string rc) {
 
 		// The given path was invalid somehow.
 		case -3:
-		printf("Error: invalid path");
+		printf("Error: invalid path\n");
+		break;
+
+		case -4:
+		printf("Error: file does not exist\n");
 		break;
 
 		// Error code is not something we expected
 		default:
 		printf("Unknown error\n");
 	}
-
 }
 
 void trimLR(string &str) {
-	while (str[0] == ' ' && str.length() > 0) {
+	while (!str.empty() && str[0] == ' ') {
 		str.erase(0, 1);
 	}
-	while (str.back() == ' ' && str.length() > 0) {
+	while (!str.empty() && str.back() == ' ') {
 		str.erase(str.length() - 1, 1);
 	}
 }
@@ -168,7 +172,9 @@ kpaTCP::kpaTCP(string serverIPaddress, int serverPort, bool serverFlag) {
 //******************************************************************************
 
 kpaTCP::~kpaTCP() {
-    close(clientSocket);
+    if (clientSocket != fd) {
+        close(clientSocket);
+    }
     close(fd);
 }
 
@@ -182,6 +188,11 @@ void kpaTCP::commsListen() {
 	cout << "FS listening on port " << serverPortNumber << endl;
     }
 
+    // Close the last shell's connection before accepting another one.
+    if (clientSocket != fd && clientSocket >= 0) {
+        close(clientSocket);
+    }
+
     // wait for a client
     sockaddr_in clientAddress;
     socklen_t clientAdressLength = sizeof(clientAddress);
@@ -193,7 +204,6 @@ void kpaTCP::commsListen() {
         close(fd);
 	exit(-1);
     }
-
 
     cout << "Client connected from " << inet_ntoa(clientAddress.sin_addr)
 	    << ":" << ntohs(clientAddress.sin_port) << endl;

@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "KPAsocket.h"
+#include "kpaFScommands.h"
 
 using namespace std;
 
@@ -39,90 +40,95 @@ string receiveCommand() {
 	// Parser will still extract them, but code to deal with them is
 	// not needed yet. Comments will mark the correct positions to deal
 	// with credential checking.
-	
-	// The return string takes the form of:
+
+	// The request string takes the form of:
 	// <call> <credentials> [pwd] [args]
-
-	// For now,
-	string rc(basket, bytesRead); // Use exactly the bytes read.
-
-	// First, check if there are even pwd or args in the string.
-	if (rc.size() > 5) {
-
-		// The start of the string looks like:
-		// call ' ' uid ':' gid ' '
-		// one byte each, so begin from position 6
-		args = rc.substr(6, rc.size());
-
+	string request(basket, bytesRead); // Use exactly the bytes read.
+	string args;
+	size_t end = request.find(' ', 2); // uid:gid can be more than three characters.
+	if (end != string::npos) {
+		args = request.substr(end + 1);
 	}
-	// No else needed, the system knows only to read from args
-	// when they should be there.
+	string pwd = extractPath(args);
 
-	pwd = extractPath(args);
+	// Keep the failure code for any call that isn't connected yet.
+	string rc(1, -1);
+	rc += ' ';
 
 	switch (call) {
-
-		// 
-
 		case _CREAT:
 		// This needs a filename, mode (file or dir), and path.
 		// called by Touch
+		// TODO: Call my_creat when creation is implemented.
+		break;
 
-		rc = my_create();
+		case _OPEN:
+		// Used by touch
+		// TODO: Wire open to the filesystem implementation.
 		break;
 
 		case _READ:
 		// touch uses this to get a byte to write back to the file
-
-		rc = my_read();
 		break;
 
 		case _WRITE:
 		// touch uses this to trigger modified time.
-
-		rc = my_write();
 		break;
 
-		case _STAT:
+		case _STAT: {
 		// Called by stat and many other shell functions
-
-		rc = my_stat();
+		int addr = -1;
+		string name = pwd;
+		if (!pwd.empty() && pwd[0] == '/') {
+			// A trailing slash can only name a directory, including root.
+			if (pwd.back() == '/') {
+				addr = findDirectoryByPath(pwd);
+				size_t last = pwd.find_last_not_of('/');
+				if (last == string::npos) {
+					name = "/";
+				} else {
+					name = pwd.substr(0, last + 1);
+					name = name.substr(name.find_last_of('/') + 1);
+				}
+			} else {
+				// Look up the last name in its parent. It can be a file or directory.
+				size_t slash = pwd.find_last_of('/');
+				name = pwd.substr(slash + 1);
+				string parentPath = slash == 0 ? "/" : pwd.substr(0, slash);
+				int parent = findDirectoryByPath(parentPath);
+				if (parent != -1) {
+					addr = findINodeInDirectory(parent, name);
+				}
+			}
+		}
+		rc[0] = -3; // Invalid path
+		if (addr != -1) {
+			rc[0] = iNodePool[addr].type == DIR ? 2 : 1;
+			rc += my_stat(addr, name);
+		}
 		break;
+		}
 
 		case _MKDIR:
 		// Called by mkdir
-
-		rc = my_mkdir();
 		break;
 
 		case _RM:
 		// Called by RM
-		
-		rc = my_rm();
+		break;
+
 		case _RMDIR:
 		// Called by rmdir. recursive delete
-
-		rc = my_rmdir();
 		break;
 
 		case _CHMOD:
-
-		rc = my_chmod();
-		break;
-
 		case _CHOWN:
-
-		rc = my_chown();
-		break;
-
 		case _LINK:
-
-		rc = my_link();
 		break;
 
 		case _KILL:
 		// Save the entire FS and break the while loop in main.
-		rc = my_kill();
+		// The save operation still needs to be connected.
 		break;
 
 		default:
@@ -131,10 +137,12 @@ string receiveCommand() {
 	}
 	// Once the system call has been executed, it's time to return the
 	// string.
-	
+
 	// Convert to char array and send over the wire
-	char *buf = rc.c_str();
-	commsWrite(buf, sizeof(buf));
+	if (tcpSocket->commsWrite(rc.data(), rc.size()) != static_cast<int>(rc.size())) {
+		return "";
+	}
+	return rc;
 }
 
 string extractPath(string str) {
@@ -147,4 +155,3 @@ string extractPath(string str) {
 	}
 	return rc;
 }
-

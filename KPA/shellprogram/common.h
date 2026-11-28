@@ -9,7 +9,7 @@
 // Common definitions for shell and FS
 // Things like SYS_CALL enumerations and formatting helper functions, as well
 // as the kpaTCP class.
-// 
+//
 // Simply include common.h to use
 
 using namespace std;
@@ -76,12 +76,11 @@ enum COMMAND : uint8_t {
 };
 
 //******************************************************************************
-// 			 	GENERIC FUNCTIONS
+// 				GENERIC FUNCTIONS
 //******************************************************************************
 
 // Converts a string into a usable COMMAND code
 COMMAND strToCmd(string str);
-	
 
 // Extracts the content from an ack returned by the FS process
 string getAckArgs(string ack);
@@ -97,7 +96,7 @@ void trimLR(string &str);
 string genCredentials();
 
 //******************************************************************************
-// 			 	KPATCP CLASS
+// 				KPATCP CLASS
 //******************************************************************************
 
 // Author: Dr. Wheat

@@ -1,12 +1,9 @@
 #include <iostream>
-#include <cstring>
-#include <filesystem>
-#include <cerrno>
-#include <unistd.h>
+#include <climits>
+#include <new>
 
 #include <cstdio>
 #include <unistd.h>
-#include <fcntl.h>
 
 #include "KPAsocket.h"
 #include "kpaFScommands.h"
@@ -16,23 +13,21 @@ using namespace std;
 //******************************************************************************
 
 // GLOBAL VARIABLES:
-bitmap *iNodeBitmap;
-bitmap *blockBitmap;
-
 iNodeType *iNodePool;
 db *blockPool;
 
-fdType *fds;
+// fdTable initializes its own descriptor entries.
+fdTable fds;
 
 unsigned int rootInodeIndex;
 
 int FSerrno;
 
-char FSfileName[256];
+const char *FSfileName;
 
 
-unsigned int userUID;
-unsigned int userGID;
+uint8_t uid, gid;
+kpaTCP *tcpSocket;
 unsigned int userMask;
 
 unsigned int debugLevel;
@@ -50,10 +45,10 @@ int main(int argc, char* argv[]) {
     unsigned int kBlocks;
     int portNumber = 8080;
 
-    char c;
+    int c; // getopt returns -1 after the last option.
 
     char usage[] =
-	    "usage: %s -f fname [-c -i n-iNodes -b K-blkcount] [-d #]\n";
+	    "usage: %s -f fname [-c -i n-iNodes -b K-blkcount] [-d #] [-p port]\n";
 
     debugLevel = 0;
 
@@ -86,7 +81,7 @@ int main(int argc, char* argv[]) {
 		// block count in K
 		bflag = true;
                 if (sscanf(optarg, "%u", &kBlocks) != 1) {
-                    fprintf(stderr, "bad -i option\n");
+                    fprintf(stderr, "bad -b option\n");
                     fprintf(stderr, usage, argv[0]);
                     exit(-1);
                 }
@@ -95,7 +90,7 @@ int main(int argc, char* argv[]) {
             case 'f':
 		// file name
 		fflag = true;
-		strcpy(FSfileName, optarg);
+		FSfileName = optarg;
                 break;
 
             case 'p':
@@ -134,23 +129,49 @@ int main(int argc, char* argv[]) {
 	cout << "Running with debug level " << debugLevel << endl;
     }
 
-    if (cflag) {
-	initFS(iNodeCount, kBlocks);
-    } else {
-	restoreFS();
+    if (!cflag) {
+        cerr << "Restoring " << FSfileName << " is not implemented yet." << endl;
+        return 1;
     }
 
-    // Create the file descriptor bitmap and initialize the file descriptor table
-    fds = new fdType[fdCount];
-    for (unsigned int fd = 0; fd < fdCount; fd++) {
-	fds[fd].active = false;
+    // -b is in units of 1024 blocks. blocks stores its byte counts in unsigned int.
+    if (iNodeCount == 0 || iNodeCount > UINT_MAX / sizeof(iNodeType) ||
+        kBlocks == 0 || kBlocks > UINT_MAX / blockSize / 1024) {
+        cerr << "Invalid inode count or block count." << endl;
+        return 1;
     }
+    unsigned int blockCount = kBlocks * 1024;
+    blocks inodeBlocks(iNodeCount, sizeof(iNodeType));
+    blocks dataBlocks(blockCount, blockSize);
 
-    // determine if this is a server or standalone implementation
-    doWork(portNumber);
+    // The pools own the memory. Start all inode generations at zero.
+    iNodePool = new (inodeBlocks.getPool()) iNodeType[iNodeCount]{};
+    blockPool = new (dataBlocks.getPool()) db[blockCount];
+
+    // On a new filesystem the first allocated inode is root, inode 0.
+    rootInodeIndex = inodeBlocks.allocate();
+    iNode &root = iNodePool[rootInodeIndex];
+    setCreationMetadata(root, DIR, 0, 0, 0777);
+
+    // Link the two index blocks to the block holding root's directory entries.
+    root.addr = dataBlocks.allocate();
+    unsigned int second = dataBlocks.allocate();
+    unsigned int data = dataBlocks.allocate();
+    blockPool[root.addr].index[0] = second;
+    blockPool[second].index[0] = data;
+    blockPool[data].dirEntry[0] = {rootInodeIndex, "."};
+    blockPool[data].dirEntry[1] = {rootInodeIndex, ".."};
+    root.size = 2 * sizeof(dirEntryType);
+
+    // Listen for the next shell when the current shell exits.
+    cerr << "Running in memory. Saving " << FSfileName << " is not implemented yet." << endl;
+    startTCP("127.0.0.1", portNumber);
+    while (true) {
+        tcpSocket->commsListen();
+        while (!receiveCommand().empty()) {
+            // Keep reading commands from the connected shell.
+        }
+    }
 
     // need to save the FS
-    saveFS();
-
-    return 0;
 }

@@ -45,8 +45,6 @@ int findDirectoryEntry(const dirEntryType entries[], unsigned int entryCount, st
 // Author: Simeon K
 // FS operations requested by the shell.
 
-// Check the file name arguments, pwd is sperate.
-bool parseCreateArgs(string requestArgs, string &name);
 
 // Set creation metadata for a selected iNode.
 void setCreationMetadata(iNode &node, fileType type, uint16_t ownerUID, uint16_t ownerGID, uint16_t permissions);
@@ -57,18 +55,12 @@ string formatPermissions(uint16_t perms);
 extern iNodeType *iNodePool;
 extern db *blockPool;
 
-// Return a status byte, a space, and the pwd.
-string my_chdir(string path, string pwd);
-
 // Format inode metadata with the requested file name.
 string my_stat(unsigned int addr, string name);
 
 // Copy file bytes and advance position and Return the number copied
 // The caller supplies enough buffer space for the bytes being read
 uint32_t readFileData(iNode &node, uint32_t &position, char buffer[], uint32_t nbytes);
-
-// Return the parent directory for the shell's cd .. request
-string my_rewinddir(string pwd);
 
 // Return bytes read, -1 for invalid input or -2 for a non readable mode
 // nbytes = -1 uses the inode's size. the called provides enough buffer space

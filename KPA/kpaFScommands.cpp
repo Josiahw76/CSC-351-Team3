@@ -83,8 +83,7 @@ int findDirectoryEntry(const dirEntryType entries[], unsigned int entryCount, st
 int findINodeInDirectory(unsigned int directoryIndex, string name) {
     int result = -1; // keep -1 until an entry matches
 
-    if (iNodePool[directoryIndex].type == DIR) {
-        fdTable table; // use a temporary descriptor for this lookup.
+    if (iNodePool[directoryIndex].type == DIR && iNodePool[directoryIndex].size % sizeof(dirEntryType) == 0) {fdTable table; // use a temporary descriptor for this lookup.
         unsigned int fd = table.openf(directoryIndex, 'r'); // Open by inode
         dirEntryType entry = {};
         char *bytes = reinterpret_cast<char *>(&entry); // Read into the record

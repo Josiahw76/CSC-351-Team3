@@ -33,7 +33,7 @@ string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 
 	// pwd is given to the command now, so include it here.
 	// If it's supposed to be blank, the caller handles that.
-	msg += pwd;
+	msg += ' ' + pwd;
 
 	// Check if we're adding raw args
 	if (useArgs) {
@@ -50,20 +50,28 @@ string issueCommand(SYS_CALL call, string pwd, bool useArgs, bool useAlts) {
 	// ***********************************************
 
 	// If everything is good, send payload to FS
-	if (doWrite) { 
-		char *str = (char *)msg.c_str();
-		tcpSocket->commsWrite(str, sizeof(str));
+	if (doWrite) {
+		if (msg.size() > sizeof(rc)) {
+			printf("Request is larger than the FS buffer.\n");
+			return string(1, -1);
+		}
+		if (tcpSocket->commsWrite(&msg[0], msg.size()) != (int)msg.size()) {
+			return string(1, -1);
+		}
 
 		// Get return message	
-		tcpSocket->commsRead(rc, sizeof(rc));
+		int bytes = tcpSocket->commsRead(rc, sizeof(rc));
+		if (bytes <= 0) {
+			return string(1, -1);
+		}
+
+		// Use the bytes actually received. The FS reply has no ending zero.
+		rc_str.assign(rc, bytes);
 
 		// If the code indicates an error, print a message
 		// to the terminal output based on the code.
 		// We get what, 127 unique error codes?
-		checkCode(rc);
-
-		// Convert it to a c string object.
-		rc_str = rc;
+		checkCode(rc_str);
 	}
 	return rc_str;
 }
@@ -86,25 +94,25 @@ string prepPath(string filename, bool dumpArg) {
 	if (bs_pos != 0) {
 		// It is not an absolute path, use the one we have saved
 		path = pwdStr;
-		if (bs_pos != string::npos) {
-			// We've determined that it is a relative path.
-			// Get filename saved so we can reuse it.
-			path += filename;
+		if (!path.empty() && path.back() != '/') {
+			path += '/';
 		}
+		// Get filename saved so we can reuse it.
+		path += filename;
 
 	} else {
 		// Else, bs at the front means the path is absolute
 		path = filename;
 	}
 
-	if ((bs_pos != string::npos) && dumpArg) {
+	if (dumpArg) {
 			bs_pos = path.find_last_of('/') + 1;
 
 			// Grab everything from after the bs to the end of str
 			filename = path.substr(bs_pos);
 
 			// Strip the end off including the '/'
-			path.erase(bs_pos - 1);
+			path.erase(bs_pos == 1 ? 1 : bs_pos - 1);
 
 			altArgs = filename;
 	}
@@ -123,7 +131,7 @@ string prepPath(string filename, bool dumpArg) {
 unsigned int getSize(string stats) {
 	size_t l_pos, r_pos = stats.size();
 
-	for (unsigned int i = 7; i < 5; i++) {
+	for (unsigned int i = 0; i < 3; i++) {
 		// Move backwards in the string using blanks
 		r_pos = stats.find_last_of(' ', r_pos - 1);
 	}
@@ -136,7 +144,7 @@ unsigned int getSize(string stats) {
 	// Convert r_pos to a value representing the length of size
 	// in bytes
 	r_pos = r_pos - l_pos;
-	char *size = stats.substr(l_pos, r_pos).c_str();
+	string size = stats.substr(l_pos, r_pos);
 
 	// Now that the size string is extracted, convert to unsigned int
 	unsigned int count, reconstructed_int;
@@ -163,7 +171,8 @@ void ls() {
 		wd = pwdStr;
 	}
 	
-	string rc = issueCommand(_LS, wd, false);
+	// The shared protocol uses directory streams for listing.
+	string rc = "ls: directory listing is not implemented for " + wd;
 
 	// Print the formatted contents of rc to the terminal window
 	// TODO
@@ -185,7 +194,7 @@ void cd() {
 	bool pathExists = true;
 
 	if (argCount == 1) {
-		wd = pwdStr;
+		wd = args[0][0] == '/' ? "/" : pwdStr;
 		// Body of the loop
 		do {
 			if (args[0].empty()) {
@@ -198,23 +207,32 @@ void cd() {
 
 			// Take off the section that we assigned to fname,
 			// including the '/'
-			args[0].erase(0, bs_pos + 1);
+			if (bs_pos == string::npos) {
+				args[0].clear();
+			} else {
+				args[0].erase(0, bs_pos + 1);
+			}
+			if (fname.empty() || fname == ".") {
+				continue;
+			}
 
-			if (/* fname is "..". skip for now */ false) {
+			if (fname == "..") {
 				// Skip the stat, erase last on path
 				bs_pos = wd.find_last_of('/');
 				if (bs_pos != 0) {
 					// make sure path isn't root
 					wd.erase(bs_pos, string::npos);
+				} else {
+					wd = "/";
 				}
 
 			} else {
 				// Stat the file to make sure it exists
-				wd.append(1, '/');
+				if (wd.back() != '/') wd.append(1, '/');
 				wd.append(fname);
 				// Send as a full path
 				rc = issueCommand(_STAT, wd, false, false);
-				if (rc[0] > 0) {
+				if (rc[0] != 2) {
 					pathExists = false;
 					break;
 				}
@@ -261,7 +279,7 @@ void stat() {
 		string rc = issueCommand(_STAT, wd, false, false);
 
 		// Cast first byte as int and check if it indicates success.
-		if ((uint8_t)rc[0] > 0) {
+		if (rc[0] == 1 || rc[0] == 2) {
 		
 			// Data ready for parse
 			string data = getAckArgs(rc);
@@ -289,7 +307,7 @@ void touch() {
 		rc = issueCommand(_READ, wd, false, true);
 
 		// If this fails, the file doesn't exist
-		if ((uint8_t)rc[0] > 0) {
+		if (rc[0] == 1) {
 			// Now put the byte back into the first position.
 			altArgs = getAckArgs(rc);
 			altArgs += " 0";
@@ -308,9 +326,9 @@ void touch() {
 
 // Tells the FS to save and shut down
 void shutdown() {
-	char buf[1];
-	buf[0] = _KILL;
-	tcpSocket->commsWrite(buf, 1);
+	if (issueCommand(_KILL, "", false)[0] != 1) {
+		printf("Filesystem is still running. Nothing was saved.\n");
+	}
 }
 
 //******************************************************************************
@@ -330,20 +348,30 @@ void lcp() {
 
 	FILE *file = fopen(args[0].c_str(), "r");
 		if (file) {
+			// Get the file size
+			if (fseek(file, 0, SEEK_END) != 0) {
+				fclose(file);
+				return;
+			}
+			long size = ftell(file);
+			if (size < 0) {
+				fclose(file);
+				return;
+			}
+
 			// Make sure it's reading from the beginning of the file
 			rewind(file);
-
-			// Get the file size
-			unsigned int size = ftell(file);
-			char *buffer = new char[size];
+			string buffer(size, '\0');
 
 			// Dump the file into the buffer as last file operation
-			fread(buffer, 1, size, file);
+			size_t count = fread(&buffer[0], 1, buffer.size(), file);
 			fclose(file);
+			if (count != buffer.size()) return;
 		
 			// Now touch filename to make sure it exists
 			// The target file should have been stored in args[1]
 			args_raw = args[1];
+			args[0] = args[1];
 
 			// Set argCount to what touch will expect.
 			argCount = 1;
@@ -381,9 +409,6 @@ void Lcp() {
 	// Everything above is just grabbing args[1]
 
 	if (argCount == 2) {
-		// Open host file
-		FILE *file = fopen(args[1].c_str(), "w");
-
 		// Prep the args_raw for read operation
 		// fd, buffer, nbytes
 
@@ -399,7 +424,14 @@ void Lcp() {
 		// bytes to put for nbytes, so default value there is the 
 		// entire length of the file, meaning all bytes
 		string rc = issueCommand(_READ, wd, false, true);
-		if (((uint8_t)rc[0] > 0)) {
+		if (rc[0] == 1 && rc.size() >= 2) {
+			// Open host file after the FS read succeeds.
+			FILE *file = fopen(args[1].c_str(), "wb");
+			if (!file) {
+				printf("Error: file could not be opened\n");
+				return;
+			}
+
 			// Lop off the return code and following blank before
 			// writing to the file.
 			rc.erase(0, 2);
@@ -430,6 +462,7 @@ void rm() {
 			// Step 3: delete the file 
 			issueCommand(_RM, wd, false, false);
 		}
+	}
 }
 
 void rmdir() {
@@ -445,6 +478,7 @@ void rmdir() {
 			// File system should handle recursive deletion 
 			issueCommand(_RMDIR, wd, false, false);
 		}
+	}
 }
 
 void chmod() {
@@ -482,15 +516,17 @@ void cp() {
 		if (rc[0] == 2) {
 			string wd;
 			unsigned int size;
-			for (i = 0; i < argCount - 1; i++) {
+			for (unsigned int i = 0; i < argCount - 1; i++) {
 				wd = prepPath(args[i]);
 				rc = issueCommand(_STAT, wd, false, false);
-				size = getSize();
+				if (rc[0] != 1) continue;
+				size = getSize(rc);
 
 				// request size number of bytes from the file
-				altArgs = size;
+				altArgs = to_string(size);
 			}
 		}
+	}
 }
 
 void mv() {}
